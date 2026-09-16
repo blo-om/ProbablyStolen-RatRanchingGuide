@@ -496,10 +496,10 @@
     .growth-banner img.gsize-2x1 { width: 64px;  height: 32px; }
     .growth-banner img.gsize-3x1 { width: 96px;  height: 32px; }
     .growth-banner img.gsize-3x2 { width: 96px;  height: 64px; }
-    /* XXL's native art is wider than a true 3x2 tile (2:1, not 3:2) - locking
-       only the height and letting width follow keeps it undistorted while
-       still matching XL's height tier. */
-    .growth-banner img.gsize-3x2-wide { height: 64px; width: auto; }
+    /* XXL's native art is 2:1, not the 3:2 XL uses - locking width to match
+       every other 3-wide rat and letting height follow keeps its own
+       proportions intact instead of stretching it to XL's height. */
+    .growth-banner img.gsize-3-auto { width: 96px; height: auto; }
 
     .growth-banner figcaption {
       font-family: var(--font-mono);
@@ -588,7 +588,7 @@
       <figure><img class="pixel-art gsize-3x1" src="assets/rat_m_m.png" alt="Medium rat"><figcaption>Medium</figcaption></figure>
       <figure><img class="pixel-art gsize-3x1" src="assets/rat_l_m.png" alt="Large rat"><figcaption>Large</figcaption></figure>
       <figure><img class="pixel-art gsize-3x2" src="assets/rat_xl_m.png" alt="Extra large rat"><figcaption>XL</figcaption></figure>
-      <figure><img class="pixel-art gsize-3x2-wide" src="assets/rat_xxl_m.png" alt="Extra extra large rat"><figcaption>XXL</figcaption></figure>
+      <figure><img class="pixel-art gsize-3-auto" src="assets/rat_xxl_m.png" alt="Extra extra large rat"><figcaption>XXL</figcaption></figure>
     </div>
   </header>
 
@@ -1093,7 +1093,7 @@ if Health &le; 0: OnAnimalDead(rat)</div>
           </div>
           <div class="kv-item">
             <span class="kv-key">0 HP Death Check</span>
-            <span class="kv-val" style="color: var(--accent-emerald);">[CONFIRMED] Explicitly checked in DayEnd</span>
+            <span class="kv-val">Explicitly checked in DayEnd</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Species Max Health</span>
@@ -1305,7 +1305,7 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
           </div>
           <div class="kv-item">
             <span class="kv-key">Partner Per Attempt</span>
-            <span class="kv-val" style="color: var(--accent-emerald);">[CONFIRMED] Each attempt is a distinct partner</span>
+            <span class="kv-val">Each attempt is a distinct partner</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Failed Attempts</span>
@@ -1341,7 +1341,7 @@ TotalPups = max(1, GuaranteedPups + ExtraPupRoll + Random(&plusmn;Variance))</di
           </div>
           <div class="kv-item">
             <span class="kv-key">Built-in Variance</span>
-            <span class="kv-val">Flat constant (=1 for rats) <span class="tag-conf">[CONFIRMED]</span></span>
+            <span class="kv-val">Flat constant (=1 for rats)</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Variance Mutation</span>
