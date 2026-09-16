@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rat Ranching Manual</title>
+<title>Rat Ranching: Under The Hood</title>
   <style>
     :root {
       --bg-canvas: #060911;
@@ -478,6 +478,81 @@
       white-space: nowrap;
     }
 
+    /* Game art */
+    .pixel-art {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .growth-banner {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 1.75rem;
+      padding: 1rem 0 0.25rem;
+      flex-wrap: wrap;
+    }
+
+    .growth-banner figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0;
+    }
+
+    .growth-banner img {
+      height: 40px;
+      width: auto;
+    }
+
+    .growth-banner figcaption {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .card-title-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .card-title-icon img {
+      height: 26px;
+      width: auto;
+      flex-shrink: 0;
+    }
+
+    .icon-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 1.1rem;
+      flex-wrap: wrap;
+      padding: 0.25rem 0 0.1rem;
+    }
+
+    .icon-row figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      margin: 0;
+    }
+
+    .icon-row img {
+      height: 34px;
+      width: auto;
+    }
+
+    .icon-row figcaption {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-tertiary);
+    }
+
     footer {
       border-top: 1px solid var(--border-subtle);
       padding-top: 1.5rem;
@@ -503,10 +578,17 @@
       <span class="meta-tag confirmed">[CONFIRMED] Decompiled from GameAssembly.dll</span>
       <span class="meta-tag source">HusbandryHelper · GeneticHelper · AnimalSpecies</span>
     </div>
-    <h1>Rat Ranching: The Complete Field Guide</h1>
+    <h1>Rat Ranching: Under The Hood</h1>
     <p class="header-desc">
       Everything you need to know about how rat breeding, survival, and genetics actually work under the hood. We pulled the real math straight from the game code and sanity-checked it against community testing so you can run your ranch with zero guesswork.
     </p>
+    <div class="growth-banner">
+      <figure><img class="pixel-art" src="assets/rat_s_m.png" alt="Small rat"><figcaption>Small</figcaption></figure>
+      <figure><img class="pixel-art" src="assets/rat_m_m.png" alt="Medium rat"><figcaption>Medium</figcaption></figure>
+      <figure><img class="pixel-art" src="assets/rat_l_m.png" alt="Large rat"><figcaption>Large</figcaption></figure>
+      <figure><img class="pixel-art" src="assets/rat_xl_m.png" alt="Extra large rat"><figcaption>XL</figcaption></figure>
+      <figure><img class="pixel-art" src="assets/rat_xxl_m.png" alt="Extra extra large rat"><figcaption>XXL</figcaption></figure>
+    </div>
   </header>
 
   <!-- OVERVIEW: Execution Pipeline Diagram & Master Stat Architecture -->
@@ -746,7 +828,7 @@ DeathChance      = 0.75 &times; IsPastDeathAge</div>
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Survival Past the Threshold</span>
+          <span class="card-title card-title-icon"><img class="pixel-art" src="assets/rat_l_m_d.png" alt="Deceased rat">Survival Past the Threshold</span>
           <span class="card-badge crit">75% Death Roll / Night</span>
         </div>
         <p style="font-size: 0.825rem; color: var(--text-secondary);">
@@ -886,6 +968,11 @@ SickChance_Hygiene = HygieneAdd + 0.20 &times; OvercrowdTier</div>
             <span class="kv-key">Dead Bodies on the Floor</span>
             <span class="kv-val">Count as full waste tiles</span>
           </div>
+        </div>
+        <div class="icon-row">
+          <figure><img class="pixel-art" src="assets/feces_small.png" alt="Small feces"><figcaption>Small</figcaption></figure>
+          <figure><img class="pixel-art" src="assets/feces.png" alt="Feces"><figcaption>Regular</figcaption></figure>
+          <figure><img class="pixel-art" src="assets/feces_large.png" alt="Large feces"><figcaption>Large</figcaption></figure>
         </div>
         <div class="callout alert">
           <strong>Don't Leave Corpses:</strong> Unbutchered carcasses rot and count straight toward that 25% dirty-room threshold.
@@ -1036,7 +1123,7 @@ if Health &le; 0: OnAnimalDead(rat)</div>
     <div class="grid-2">
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Cramped Cage Tiers</span>
+          <span class="card-title card-title-icon"><img class="pixel-art" src="assets/animal_cage.png" alt="Animal cage">Cramped Cage Tiers</span>
           <span class="card-badge crit">Instant Execution</span>
         </div>
         <div class="formula">Occupancy = RatTiles &divide; TotalTiles
@@ -1161,7 +1248,7 @@ Hunger &lt; 398: Penalty = max(0, 0.50 - 0.49 &times; H &divide; 398)</div>
       <!-- Butchery & Poop Card -->
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Butcher Cuts &amp; Droppings</span>
+          <span class="card-title card-title-icon"><img class="pixel-art" src="assets/raw_meat.png" alt="Raw meat">Butcher Cuts &amp; Droppings</span>
           <span class="card-badge info">Discrete Modulo</span>
         </div>
         <div class="formula">EffectiveWeight = Weight &times; (1 - 0.25 &times; IsSick)
@@ -1188,6 +1275,11 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
             <span class="kv-val">Day 10 (Peak weight before elder loss)</span>
           </div>
         </div>
+        <div class="icon-row">
+          <figure><img class="pixel-art" src="assets/raw_meat.png" alt="Raw meat"><figcaption>Raw</figcaption></figure>
+          <figure><img class="pixel-art" src="assets/processed_meat.png" alt="Processed meat"><figcaption>Processed</figcaption></figure>
+          <figure><img class="pixel-art" src="assets/meat_scrap.png" alt="Meat scrap"><figcaption>Scrap</figcaption></figure>
+        </div>
       </div>
     </div>
   </section>
@@ -1203,7 +1295,7 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
       <!-- Mating Mechanics -->
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Mating Attempts &amp; Ratios</span>
+          <span class="card-title card-title-icon"><img class="pixel-art" src="assets/mouse_icon_left.png" alt="Mouse icon"><img class="pixel-art" src="assets/mouse_icon_right.png" alt="Mouse icon" style="margin-left:-0.4rem;">Mating Attempts &amp; Ratios</span>
           <span class="card-badge">CheckMate</span>
         </div>
         <div class="formula">PregnancyChance = min(EffectiveFertility_A, EffectiveFertility_B)</div>
@@ -1275,7 +1367,7 @@ TotalPups = max(1, GuaranteedPups + ExtraPupRoll + Random(&plusmn;Variance))</di
       <!-- Inheritance Mechanics -->
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Passing Down Genes</span>
+          <span class="card-title card-title-icon"><img class="pixel-art" src="assets/genetic_scanner.png" alt="Genetic scanner">Passing Down Genes</span>
           <span class="card-badge">Punnett Square Model</span>
         </div>
         <div class="formula">Child.AlleleA = Mutate(MotherContribution, Baseline)
@@ -1411,11 +1503,15 @@ NetMaxStep (Wide)    = +0.09 &times; Baseline (3&times; Step, 3&times; Pullback)
     </div>
 
     <div class="card">
+      <div class="card-head">
+        <span class="card-title card-title-icon"><img class="pixel-art" src="assets/raw_meat.png" alt="Raw meat">Contamination &amp; Permanent Penalty</span>
+        <span class="card-badge crit">CheckCannibalism</span>
+      </div>
       <div class="formula">IsFoodFlagged = [Food already carries Prion flag]
 InfectionChance = 1.0 - (1.0 - IsFoodFlagged) &times; (Immunity &divide; 100)
 
 On Infection: Permanent -20% penalty applied simultaneously to Growth, Immunity, and Longevity.</div>
-      
+
       <div class="grid-2" style="margin-top: 0.5rem;">
         <div class="callout alert">
           <strong>Contaminated Feeders:</strong> Meat already carrying the Prion flag infects rats 100% of the time, ignoring immunity completely. Clean raw meat rolls <code>1 - Immunity/100</code>.
