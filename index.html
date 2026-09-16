@@ -41,6 +41,14 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
+    section {
+      scroll-margin-top: 1.5rem;
+    }
+
     body {
       background-color: var(--bg-canvas);
       color: var(--text-main);
@@ -187,6 +195,8 @@
       text-align: center;
       gap: 0.2rem;
       position: relative;
+      text-decoration: none;
+      cursor: pointer;
       transition: border-color 0.15s ease, transform 0.15s ease;
     }
 
@@ -595,106 +605,106 @@
   <!-- OVERVIEW: Execution Pipeline Diagram & Master Stat Architecture -->
   <section>
     <div class="section-header">
-      <h2 class="section-title">The Nightly Routine (What Happens While You Sleep)</h2>
+      <h2 class="section-title">The Nightly Routine</h2>
       <span class="card-badge warn">Runs Top-to-Bottom</span>
     </div>
     
     <div class="pipeline-container">
       <div class="pipeline-flow">
         <!-- Step 1 -->
-        <div class="pipe-node hazard-kill">
+        <a class="pipe-node hazard-kill" href="#step-01">
           <span class="pipe-step-num">STEP 01</span>
           <span class="pipe-name">Longevity</span>
           <span class="pipe-consequence">Old-Age Roll</span>
-        </div>
+        </a>
 
         <div class="pipe-arrow">
           <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </div>
 
         <!-- Step 2 -->
-        <div class="pipe-node hazard-neutral">
+        <a class="pipe-node hazard-neutral" href="#step-02">
           <span class="pipe-step-num">STEP 02</span>
           <span class="pipe-name">Feeding</span>
           <span class="pipe-consequence neutral">Eat from Feeder</span>
-        </div>
+        </a>
 
         <div class="pipe-arrow">
           <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </div>
 
         <!-- Step 3 -->
-        <div class="pipe-node hazard-eval">
+        <a class="pipe-node hazard-eval" href="#step-03">
           <span class="pipe-step-num">STEP 03</span>
           <span class="pipe-name">Hygiene</span>
           <span class="pipe-consequence eval">Pen Cleanliness</span>
-        </div>
+        </a>
 
         <div class="pipe-arrow">
           <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </div>
 
         <!-- Step 4 -->
-        <div class="pipe-node hazard-eval">
+        <a class="pipe-node hazard-eval" href="#step-04">
           <span class="pipe-step-num">STEP 04</span>
           <span class="pipe-name">Immunity</span>
           <span class="pipe-consequence eval">Natural Illness</span>
-        </div>
+        </a>
 
         <div class="pipe-arrow">
           <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </div>
 
         <!-- Step 5 -->
-        <div class="pipe-node hazard-kill">
+        <a class="pipe-node hazard-kill" href="#step-05">
           <span class="pipe-step-num">STEP 05</span>
           <span class="pipe-name">Health Update</span>
           <span class="pipe-consequence">Regen &rarr; Sick &rarr; 0HP</span>
-        </div>
+        </a>
 
         <div class="pipe-arrow">
           <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </div>
 
         <!-- Step 6 -->
-        <div class="pipe-node hazard-kill">
+        <a class="pipe-node hazard-kill" href="#step-06">
           <span class="pipe-step-num">STEP 06</span>
           <span class="pipe-name">Crowding</span>
           <span class="pipe-consequence">Weight Culling</span>
-        </div>
+        </a>
 
         <div class="pipe-arrow">
           <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </div>
 
         <!-- Step 7 -->
-        <div class="pipe-node hazard-eval">
+        <a class="pipe-node hazard-eval" href="#step-07">
           <span class="pipe-step-num">STEP 07</span>
           <span class="pipe-name">Fertility</span>
           <span class="pipe-consequence eval">Mating Check</span>
-        </div>
+        </a>
 
         <div class="pipe-arrow">
           <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </div>
 
         <!-- Step 8 -->
-        <div class="pipe-node hazard-growth">
+        <a class="pipe-node hazard-growth" href="#step-08">
           <span class="pipe-step-num">STEP 08</span>
           <span class="pipe-name">Growth</span>
           <span class="pipe-consequence growth">Weight &amp; Poop</span>
-        </div>
+        </a>
 
         <div class="pipe-arrow">
           <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </div>
 
         <!-- Step 9 -->
-        <div class="pipe-node hazard-growth">
+        <a class="pipe-node hazard-growth" href="#step-09">
           <span class="pipe-step-num">STEP 09</span>
           <span class="pipe-name">Mating</span>
           <span class="pipe-consequence growth">Pair Up</span>
-        </div>
+        </a>
       </div>
 
       <div class="callout takeaway">
@@ -793,7 +803,7 @@
   </section>
 
   <!-- SECTION 01: Step 01 - Longevity -->
-  <section>
+  <section id="step-01">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">01</span> Step 01: Longevity &amp; Natural Death</h2>
       <span class="card-badge crit">Step 01 · First Thing Every Night</span>
@@ -865,7 +875,7 @@ DeathChance      = 0.75 &times; IsPastDeathAge</div>
   </section>
 
   <!-- SECTION 02: Step 02 - Feeding -->
-  <section>
+  <section id="step-02">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">02</span> Step 02: Hunger, Appetite &amp; Feeding</h2>
       <span class="card-badge info">Step 02 · 500 Max Reservoir</span>
@@ -923,7 +933,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
   </section>
 
   <!-- SECTION 03: Step 03 - Hygiene -->
-  <section>
+  <section id="step-03">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">03</span> Step 03: Dirty Cages &amp; Room Hygiene</h2>
       <span class="card-badge warn">Step 03 · CheckHygiene</span>
@@ -984,7 +994,7 @@ SickChance_Hygiene = HygieneAdd + 0.20 &times; OvercrowdTier</div>
   </section>
 
   <!-- SECTION 04: Step 04 - Immunity -->
-  <section>
+  <section id="step-04">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">04</span> Step 04: Natural Sickness &amp; Immunity</h2>
       <span class="card-badge good">Step 04 · CheckImmunityDisease</span>
@@ -1044,36 +1054,47 @@ SickChance_Spontaneous = IsSusceptible &times; (0.25 - Immunity &divide; 50 &tim
   </section>
 
   <!-- SECTION 05: Step 05 - Health Update & Regeneration -->
-  <section>
+  <section id="step-05">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">05</span> Step 05: Nightly Health, Healing &amp; Sickness Damage</h2>
       <span class="card-badge crit">Step 05 · ModifyHealth (RVA 0x8CADE0)</span>
     </div>
 
     <div class="grid-2">
-      <!-- Card 1: Sequential ModifyHealth Pipeline -->
+      <!-- Card 1: Health formula -->
       <div class="card">
         <div class="card-head">
           <span class="card-title">How Health Updates Resolve</span>
-          <span class="card-badge crit">Sub-Steps 5a &rarr; 5b &rarr; 5c</span>
+          <span class="card-badge crit">Every Rat, Every Night</span>
         </div>
-        <div class="formula">// 5a. Nightly Health Healing (Runs for all rats, sick or not)
-Regen = min(0.3 &times; MaxHealth, ((Immunity - 25) &divide; 25) &times; 0.3 &times; MaxHealth)
-ModifyHealth(Regen)
+        <div class="formula">Regen = min(0.3 &times; MaxHealth, ((Immunity - 25) &divide; 25) &times; 0.3 &times; MaxHealth)
+SicknessDamage = IsSick &times; (-0.25 &times; MaxHealth)
+RecoverChance = Immunity &divide; 100
 
-// 5b. Sickness Damage &amp; Recovery
-if IsSick == 1:
-    ModifyHealth(-0.25 &times; MaxHealth)   // Hits before recovery is rolled
-    if Roll(Immunity &divide; 100):
-        IsSick = 0                         // Cured for tomorrow
-
-// 5c. Death Check
-if Health &le; 0: OnAnimalDead(rat)</div>
+Health = Health + Regen + SicknessDamage</div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Regen &amp; Sickness Damage</span>
+            <span class="kv-val">Both land the same night, sick or not</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Recovery Roll</span>
+            <span class="kv-val">Checked after damage lands</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">If Cured</span>
+            <span class="kv-val">Sick flag clears for tomorrow only</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Death Check</span>
+            <span class="kv-val">Health &le; 0 &rarr; rat dies instantly</span>
+          </div>
+        </div>
         <div class="callout alert">
-          <strong>Low Immunity Bleed:</strong> Healing has no floor clamp. Below 25 Immunity, healthy rats bleed health every night. At 0 Immunity, a rat loses 30 HP nightly and dies in 4 days with no disease involved.
+          <strong>Low Immunity Bleed:</strong> Regen has no floor of its own. Below 25 Immunity, healthy rats bleed health every night. At 0 Immunity, a rat loses 30 HP nightly and dies in 4 days with no disease involved.
         </div>
         <div class="callout takeaway">
-          <strong>Damage Lands First:</strong> Sickness damage hits before the rat gets a chance to shake it off. A recovering rat takes -25 HP tonight, and the cure only takes effect tomorrow.
+          <strong>Damage Lands First:</strong> Sickness damage hits before the rat gets a chance to shake it off. A recovering rat still takes -25 HP that night &mdash; the cure only takes effect tomorrow.
         </div>
       </div>
 
@@ -1099,10 +1120,6 @@ if Health &le; 0: OnAnimalDead(rat)</div>
             <span class="kv-key">Species Max Health</span>
             <span class="kv-val">100.0 (AnimalSpecies.cctor)</span>
           </div>
-          <div class="kv-item">
-            <span class="kv-key">SetHealthToZero</span>
-            <span class="kv-val" style="color: var(--text-tertiary);">RVA 0x8CCB60 (Unused in night loop)</span>
-          </div>
         </div>
         <div class="callout takeaway">
           <strong>Key Takeaway:</strong> Rats die the instant Health hits 0 &mdash; that check is explicit and unconditional in every night's DayEnd pass.
@@ -1112,7 +1129,7 @@ if Health &le; 0: OnAnimalDead(rat)</div>
   </section>
 
   <!-- SECTION 06: Step 06 - Overcrowding -->
-  <section>
+  <section id="step-06">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">06</span> Step 06: Overcrowding &amp; Why Runts Die First</h2>
       <span class="card-badge crit">Step 06 · Instant Death Check</span>
@@ -1152,7 +1169,7 @@ Tier 3 (&ge;0.90):      15% death roll per rat each night</div>
   </section>
 
   <!-- SECTION 07: Step 07 - Fertility Evaluation -->
-  <section>
+  <section id="step-07">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">07</span> Step 07: Fertility &amp; Stacking Penalties</h2>
       <span class="card-badge eval">Step 07 · Effective Odds</span>
@@ -1204,7 +1221,7 @@ EffectiveFertility = max(0, StatFertility &times; (1 - HungerPenalty
   </section>
 
   <!-- SECTION 08: Step 08 - Somatic Growth & Butchery -->
-  <section>
+  <section id="step-08">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">08</span> Step 08: Daily Growth, Poop &amp; Meat Cuts</h2>
       <span class="card-badge good">Step 08 · Weight &amp; Butchery</span>
@@ -1284,7 +1301,7 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
   </section>
 
   <!-- SECTION 09: Step 09 - Mating Allocation -->
-  <section>
+  <section id="step-09">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">09</span> Step 09: Mating &amp; How Litters Are Rolled</h2>
       <span class="card-badge good">Step 09 · Final Nightly Step</span>
