@@ -496,6 +496,10 @@
     .growth-banner img.gsize-2x1 { width: 64px;  height: 32px; }
     .growth-banner img.gsize-3x1 { width: 96px;  height: 32px; }
     .growth-banner img.gsize-3x2 { width: 96px;  height: 64px; }
+    /* XXL's native art is wider than a true 3x2 tile (2:1, not 3:2) - locking
+       only the height and letting width follow keeps it undistorted while
+       still matching XL's height tier. */
+    .growth-banner img.gsize-3x2-wide { height: 64px; width: auto; }
 
     .growth-banner figcaption {
       font-family: var(--font-mono);
@@ -538,6 +542,12 @@
       width: auto;
     }
 
+    /* Meat-cut icons: scaled to their in-game portion size (34px/unit),
+       SmallMorsels (1x1) stays at the row's default 34x34. */
+    .icon-row-cuts img.g-2x1 { width: 68px;  height: 34px; }
+    .icon-row-cuts img.g-2x2 { width: 68px;  height: 68px; }
+    .icon-row-cuts img.g-3x2 { width: 102px; height: 68px; }
+
     .icon-row figcaption {
       font-family: var(--font-mono);
       font-size: 0.6rem;
@@ -578,7 +588,7 @@
       <figure><img class="pixel-art gsize-3x1" src="assets/rat_m_m.png" alt="Medium rat"><figcaption>Medium</figcaption></figure>
       <figure><img class="pixel-art gsize-3x1" src="assets/rat_l_m.png" alt="Large rat"><figcaption>Large</figcaption></figure>
       <figure><img class="pixel-art gsize-3x2" src="assets/rat_xl_m.png" alt="Extra large rat"><figcaption>XL</figcaption></figure>
-      <figure><img class="pixel-art gsize-3x2" src="assets/rat_xxl_m.png" alt="Extra extra large rat"><figcaption>XXL</figcaption></figure>
+      <figure><img class="pixel-art gsize-3x2-wide" src="assets/rat_xxl_m.png" alt="Extra extra large rat"><figcaption>XXL</figcaption></figure>
     </div>
   </header>
 
@@ -1263,10 +1273,10 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
             <span class="kv-val">Day 10 (Peak weight before elder loss)</span>
           </div>
         </div>
-        <div class="icon-row">
-          <figure><img class="pixel-art" src="assets/raw_meat.png" alt="Standard cut"><figcaption>StandardCuts</figcaption></figure>
-          <figure><img class="pixel-art" src="assets/small_raw_meat.png" alt="Small cut"><figcaption>SmallCuts</figcaption></figure>
-          <figure><img class="pixel-art" src="assets/morsel.png" alt="Morsel"><figcaption>Morsels</figcaption></figure>
+        <div class="icon-row icon-row-cuts">
+          <figure><img class="pixel-art g-3x2" src="assets/raw_meat.png" alt="Standard cut"><figcaption>StandardCuts</figcaption></figure>
+          <figure><img class="pixel-art g-2x2" src="assets/small_raw_meat.png" alt="Small cut"><figcaption>SmallCuts</figcaption></figure>
+          <figure><img class="pixel-art g-2x1" src="assets/morsel.png" alt="Morsel"><figcaption>Morsels</figcaption></figure>
           <figure><img class="pixel-art" src="assets/morsel_small.png" alt="Small morsel"><figcaption>SmallMorsels</figcaption></figure>
         </div>
       </div>
