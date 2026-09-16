@@ -489,9 +489,13 @@
     }
 
     .growth-banner img {
-      height: 40px;
-      width: auto;
+      display: block;
     }
+
+    /* Grid-unit sizing: 1 in-game tile = 32px, matching each rat's actual footprint */
+    .growth-banner img.gsize-2x1 { width: 64px;  height: 32px; }
+    .growth-banner img.gsize-3x1 { width: 96px;  height: 32px; }
+    .growth-banner img.gsize-3x2 { width: 96px;  height: 64px; }
 
     .growth-banner figcaption {
       font-family: var(--font-mono);
@@ -570,11 +574,11 @@
       Everything you need to know about how rat breeding, survival, and genetics actually work under the hood. We pulled the real math straight from the game code and sanity-checked it against community testing so you can run your ranch with zero guesswork.
     </p>
     <div class="growth-banner">
-      <figure><img class="pixel-art" src="assets/rat_s_m.png" alt="Small rat"><figcaption>Small</figcaption></figure>
-      <figure><img class="pixel-art" src="assets/rat_m_m.png" alt="Medium rat"><figcaption>Medium</figcaption></figure>
-      <figure><img class="pixel-art" src="assets/rat_l_m.png" alt="Large rat"><figcaption>Large</figcaption></figure>
-      <figure><img class="pixel-art" src="assets/rat_xl_m.png" alt="Extra large rat"><figcaption>XL</figcaption></figure>
-      <figure><img class="pixel-art" src="assets/rat_xxl_m.png" alt="Extra extra large rat"><figcaption>XXL</figcaption></figure>
+      <figure><img class="pixel-art gsize-2x1" src="assets/rat_s_m.png" alt="Small rat"><figcaption>Small</figcaption></figure>
+      <figure><img class="pixel-art gsize-3x1" src="assets/rat_m_m.png" alt="Medium rat"><figcaption>Medium</figcaption></figure>
+      <figure><img class="pixel-art gsize-3x1" src="assets/rat_l_m.png" alt="Large rat"><figcaption>Large</figcaption></figure>
+      <figure><img class="pixel-art gsize-3x2" src="assets/rat_xl_m.png" alt="Extra large rat"><figcaption>XL</figcaption></figure>
+      <figure><img class="pixel-art gsize-3x2" src="assets/rat_xxl_m.png" alt="Extra extra large rat"><figcaption>XXL</figcaption></figure>
     </div>
   </header>
 
@@ -1518,5 +1522,7 @@ On Infection: Permanent -20% penalty applied simultaneously to Growth, Immunity,
     <span>GameAssembly.dll · Assembly-CSharp.dll · Verified Mechanics Reference</span>
   </footer>
 
-</div></body>
+</div>
+
+</body>
 </html>
