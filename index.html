@@ -564,6 +564,59 @@
       color: var(--text-tertiary);
     }
 
+    .back-to-top {
+      position: fixed;
+      left: 1.5rem;
+      bottom: 1.5rem;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.6rem 0.95rem 0.6rem 0.75rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-medium);
+      border-radius: 999px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.15s ease;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .back-to-top:hover {
+      border-color: var(--border-bright);
+      color: var(--text-main);
+    }
+
+    .back-to-top svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 2.4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (max-width: 640px) {
+      .back-to-top {
+        left: 0.85rem;
+        bottom: 0.85rem;
+        padding: 0.55rem 0.85rem 0.55rem 0.65rem;
+      }
+    }
+
     footer {
       border-top: 1px solid var(--border-subtle);
       padding-top: 1.5rem;
@@ -579,6 +632,11 @@
   </style>
 </head>
 <body>
+
+<a href="#" class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  Top
+</a>
 
 <div class="container">
 
@@ -1172,7 +1230,7 @@ Tier 3 (&ge;0.90):      15% death roll per rat each night</div>
   <section id="step-07">
     <div class="section-header">
       <h2 class="section-title"><span class="section-num">07</span> Step 07: Fertility &amp; Stacking Penalties</h2>
-      <span class="card-badge eval">Step 07 · Effective Odds</span>
+      <span class="card-badge warn">Step 07 · Effective Odds</span>
     </div>
 
     <div class="grid-2">
@@ -1550,6 +1608,20 @@ On Infection: Permanent -20% penalty applied simultaneously to Growth, Immunity,
   </footer>
 
 </div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('backToTop');
+    if (!btn) return;
+    window.addEventListener('scroll', function () {
+      btn.classList.toggle('visible', window.scrollY > 700);
+    });
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+</script>
 
 </body>
 </html>
