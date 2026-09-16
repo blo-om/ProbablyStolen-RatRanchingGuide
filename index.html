@@ -885,7 +885,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
           </div>
           <div class="kv-item">
             <span class="kv-key">Starting Newborn Stomach</span>
-            <span class="kv-val">500 in Engine <span class="tag-conf">~125 Observed</span></span>
+            <span class="kv-val">500 Fallback <span class="tag-community">unverified</span></span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Starvation Trigger</span>
@@ -895,6 +895,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
         <div class="callout takeaway">
           <strong>Picky Eaters:</strong> Rats won't touch a food item if their current hunger already covers 75% of <em>that item's</em> value (<code>FoodMaxValue &times; 0.75 &le; HungerToday</code>). This is relative to each food's own value, not a single fixed hunger number &mdash; a small snack still gets eaten well past the point a big meal would be rejected.
         </div>
+        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><span class="tag-community" style="margin-right: 0.4rem;">unverified</span>We dug further into <code>InitAnimalItem</code> and <code>GiveBirth</code> and confirmed neither one sets a rat's Hunger tag explicitly at spawn &mdash; so the 500 is a fallback default from <code>AnimalSpecies</code>'s own base-stats table, read only if nothing else set it first. We still couldn't find where (or whether) a newborn's stomach is set to something lower like the commonly reported ~125 &mdash; that logic likely lives in a pup-specific setup call we haven't decompiled.</p>
       </div>
 
       <div class="card">
@@ -915,7 +916,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
         <div class="callout takeaway">
           <strong>Breeding Goal:</strong> Breeding Hunger Rate down allows rats to stay above the 398 growth threshold for days on a single feeding.
         </div>
-        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><span class="tag-community" style="margin-right: 0.4rem;">unverified</span>We haven't found a hunger-triggered miscarriage mechanic in <code>OnPregnant</code>/<code>HandlePregnancyProgress</code> &mdash; if this exists, we don't have decompile evidence for it yet.</p>
+        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><span class="tag-conf" style="margin-right: 0.4rem;">CONFIRMED</span>We re-checked and found a real miscarriage mechanic in <code>HandlePregnancyProgress</code>: every night while pregnant, if a specific status flag is active, there's a flat <b>75% chance to lose the pregnancy</b> instead of progressing toward birth (otherwise progress just ticks up by 1, and birth fires once it reaches the species' pregnancy duration). <span class="tag-community">unverified</span> We can't read that flag's name statically, but the same flag also exempts a rat from a low-hunger growth penalty elsewhere in the code &mdash; the pattern strongly suggests it's tied to starvation (Hunger hitting 0), matching the "can't mate" starvation note above, but we can't say that with 100% certainty.</p>
       </div>
     </div>
   </section>
@@ -1109,6 +1110,7 @@ if Health &le; 0: OnAnimalDead(rat)</div>
         <div class="callout takeaway">
           <strong>Key Takeaway:</strong> Rats definitely die the instant health hits 0. Whether health can glitch past 100 HP is handled downstream, but 100 is the design target.
         </div>
+        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><span class="tag-community" style="margin-right: 0.4rem;">unverified</span>Traced one level further: <code>ModifyHealth</code>'s generic tag-setter doesn't apply the delta itself either &mdash; it does a <b>virtual method call</b> on the event object it just built, effectively handing control to that object's own "Apply" method on a class we haven't identified. Any upper clamp would live there. That's a different C# class than <code>HusbandryHelper</code> entirely, and pinning it down would need a fresh round of class/vtable analysis &mdash; more work than we've put in so far, so this stays unverified rather than resolved.</p>
       </div>
     </div>
   </section>
@@ -1295,7 +1297,7 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
       <!-- Mating Mechanics -->
       <div class="card">
         <div class="card-head">
-          <span class="card-title card-title-icon"><img class="pixel-art" src="assets/mouse_icon_left.png" alt="Mouse icon"><img class="pixel-art" src="assets/mouse_icon_right.png" alt="Mouse icon" style="margin-left:-0.4rem;">Mating Attempts &amp; Ratios</span>
+          <span class="card-title card-title-icon"><img class="pixel-art" src="assets/rat_m_m.png" alt="Male rat"><img class="pixel-art" src="assets/rat_m_f.png" alt="Female rat" style="margin-left:-0.5rem;">Mating Attempts &amp; Ratios</span>
           <span class="card-badge">CheckMate</span>
         </div>
         <div class="formula">PregnancyChance = min(EffectiveFertility_A, EffectiveFertility_B)</div>
@@ -1303,6 +1305,10 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
           <div class="kv-item">
             <span class="kv-key">Attempts Per Rat</span>
             <span class="kv-val">Up to 3 attempts every night</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Partner Per Attempt</span>
+            <span class="kv-val" style="color: var(--accent-emerald);">[CONFIRMED] Each attempt is a distinct partner</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Failed Attempts</span>
@@ -1314,11 +1320,11 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
           </div>
           <div class="kv-item">
             <span class="kv-key">Best Breeding Ratio</span>
-            <span class="kv-val">1 Male : 4&ndash;6 Females <span class="tag-community">unverified</span></span>
+            <span class="kv-val">1 Male : 3+ Females <span class="tag-community">estimate</span></span>
           </div>
         </div>
         <div class="callout takeaway">
-          <strong>Harem Sizing:</strong> The 3-attempt limit resets fresh every night, so a single male isn't hard-capped at one partner. We haven't derived an optimal ratio from the decompile, though &mdash; the 4&ndash;6 figure is a reasonable-sounding estimate, not something we've traced back to a formula.
+          <strong>Harem Sizing:</strong> We re-traced <code>CheckMate</code> and confirmed exactly how the 3 attempts work: the game shuffles the eligible, non-pregnant, opposite-sex roommates and walks that shuffled list once, trying a <b>different partner on each of the (up to) 3 attempts</b> &mdash; not 3 rolls against the same rat. With fewer than 3 eligible partners available, the extra attempts just go unused that night. That means <b>3</b> is the actual mechanical floor for using a male's full nightly budget; the commonly cited 4&ndash;6 is a sensible buffer on top of that floor (since a female becomes ineligible the moment she's pregnant, thinning the pool some nights), not a number we've derived from a formula.
         </div>
       </div>
 
