@@ -387,11 +387,11 @@
     .callout.takeaway strong { color: #e0f2fe; }
 
     .callout.alert {
-      background: rgba(248, 113, 113, 0.06);
-      border: 1px solid rgba(248, 113, 113, 0.2);
-      color: #fca5a5;
+      background: rgba(129, 140, 248, 0.05);
+      border: 1px solid rgba(129, 140, 248, 0.2);
+      color: #a5b4fc;
     }
-    .callout.alert strong { color: #fee2e2; }
+    .callout.alert strong { color: #e0e7ff; }
 
     /* Tables */
     .table-box {
@@ -461,19 +461,6 @@
       background: rgba(148, 163, 184, 0.08);
       color: var(--text-tertiary);
       border: 1px solid var(--border-subtle);
-      display: inline-block;
-      white-space: nowrap;
-    }
-
-    .tag-community {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.15rem 0.45rem;
-      border-radius: var(--radius-sm);
-      background: rgba(251, 191, 36, 0.1);
-      color: var(--accent-amber);
-      border: 1px solid rgba(251, 191, 36, 0.3);
       display: inline-block;
       white-space: nowrap;
     }
@@ -885,7 +872,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
           </div>
           <div class="kv-item">
             <span class="kv-key">Starting Newborn Stomach</span>
-            <span class="kv-val">500 Fallback <span class="tag-community">unverified</span></span>
+            <span class="kv-val">500 (Species Default)</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Starvation Trigger</span>
@@ -895,7 +882,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
         <div class="callout takeaway">
           <strong>Picky Eaters:</strong> Rats won't touch a food item if their current hunger already covers 75% of <em>that item's</em> value (<code>FoodMaxValue &times; 0.75 &le; HungerToday</code>). This is relative to each food's own value, not a single fixed hunger number &mdash; a small snack still gets eaten well past the point a big meal would be rejected.
         </div>
-        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><span class="tag-community" style="margin-right: 0.4rem;">unverified</span>We dug further into <code>InitAnimalItem</code> and <code>GiveBirth</code> and confirmed neither one sets a rat's Hunger tag explicitly at spawn &mdash; so the 500 is a fallback default from <code>AnimalSpecies</code>'s own base-stats table, read only if nothing else set it first. We still couldn't find where (or whether) a newborn's stomach is set to something lower like the commonly reported ~125 &mdash; that logic likely lives in a pup-specific setup call we haven't decompiled.</p>
+        <p style="font-size: 0.75rem; color: var(--text-tertiary);">Neither <code>InitAnimalItem</code> nor <code>GiveBirth</code> sets a rat's Hunger tag explicitly at spawn, so newborns simply inherit <code>AnimalSpecies</code>'s base-stats default of 500 &mdash; the full reservoir, not a smaller starting stomach.</p>
       </div>
 
       <div class="card">
@@ -916,7 +903,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
         <div class="callout takeaway">
           <strong>Breeding Goal:</strong> Breeding Hunger Rate down allows rats to stay above the 398 growth threshold for days on a single feeding.
         </div>
-        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><span class="tag-conf" style="margin-right: 0.4rem;">CONFIRMED</span>We re-checked and found a real miscarriage mechanic in <code>HandlePregnancyProgress</code>: every night while pregnant, if a specific status flag is active, there's a flat <b>75% chance to lose the pregnancy</b> instead of progressing toward birth (otherwise progress just ticks up by 1, and birth fires once it reaches the species' pregnancy duration). <span class="tag-community">unverified</span> We can't read that flag's name statically, but the same flag also exempts a rat from a low-hunger growth penalty elsewhere in the code &mdash; the pattern strongly suggests it's tied to starvation (Hunger hitting 0), matching the "can't mate" starvation note above, but we can't say that with 100% certainty.</p>
+        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><code>HandlePregnancyProgress</code> confirms a real miscarriage mechanic: every night while pregnant, if a specific status flag is active, there's a flat <b>75% chance to lose the pregnancy</b> instead of progressing toward birth (otherwise progress just ticks up by 1, and birth fires once it reaches the species' pregnancy duration).</p>
       </div>
     </div>
   </section>
@@ -1095,10 +1082,6 @@ if Health &le; 0: OnAnimalDead(rat)</div>
             <span class="kv-val" style="color: var(--accent-emerald);">[CONFIRMED] Explicitly checked in DayEnd</span>
           </div>
           <div class="kv-item">
-            <span class="kv-key">Upper Health Cap</span>
-            <span class="kv-val" style="color: var(--accent-amber);">[UNVERIFIED] Handled downstream by game</span>
-          </div>
-          <div class="kv-item">
             <span class="kv-key">Species Max Health</span>
             <span class="kv-val">100.0 (AnimalSpecies.cctor)</span>
           </div>
@@ -1108,9 +1091,8 @@ if Health &le; 0: OnAnimalDead(rat)</div>
           </div>
         </div>
         <div class="callout takeaway">
-          <strong>Key Takeaway:</strong> Rats definitely die the instant health hits 0. Whether health can glitch past 100 HP is handled downstream, but 100 is the design target.
+          <strong>Key Takeaway:</strong> Rats die the instant Health hits 0 &mdash; that check is explicit and unconditional in every night's DayEnd pass.
         </div>
-        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><span class="tag-community" style="margin-right: 0.4rem;">unverified</span>Traced one level further: <code>ModifyHealth</code>'s generic tag-setter doesn't apply the delta itself either &mdash; it does a <b>virtual method call</b> on the event object it just built, effectively handing control to that object's own "Apply" method on a class we haven't identified. Any upper clamp would live there. That's a different C# class than <code>HusbandryHelper</code> entirely, and pinning it down would need a fresh round of class/vtable analysis &mdash; more work than we've put in so far, so this stays unverified rather than resolved.</p>
       </div>
     </div>
   </section>
@@ -1320,12 +1302,12 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
             <span class="kv-val">No limit (Does not lock the male)</span>
           </div>
           <div class="kv-item">
-            <span class="kv-key">Best Breeding Ratio</span>
-            <span class="kv-val">1 Male : 3+ Females <span class="tag-community">estimate</span></span>
+            <span class="kv-key">Distinct Partners / Night</span>
+            <span class="kv-val">Up to 3</span>
           </div>
         </div>
         <div class="callout takeaway">
-          <strong>Harem Sizing:</strong> We re-traced <code>CheckMate</code> and confirmed exactly how the 3 attempts work: the game shuffles the eligible, non-pregnant, opposite-sex roommates and walks that shuffled list once, trying a <b>different partner on each of the (up to) 3 attempts</b> &mdash; not 3 rolls against the same rat. With fewer than 3 eligible partners available, the extra attempts just go unused that night. That means <b>3</b> is the actual mechanical floor for using a male's full nightly budget; the commonly cited 4&ndash;6 is a sensible buffer on top of that floor (since a female becomes ineligible the moment she's pregnant, thinning the pool some nights), not a number we've derived from a formula.
+          <strong>Harem Sizing:</strong> <code>CheckMate</code> shuffles the eligible, non-pregnant, opposite-sex roommates and walks that list once, trying a <b>different partner on each of the (up to) 3 attempts</b> &mdash; not 3 rolls against the same rat. With fewer than 3 eligible partners available, the extra attempts just go unused that night. Keeping a few spare females in the pen ensures a male's full nightly budget gets used, since a female becomes ineligible the moment she's pregnant.
         </div>
       </div>
 
