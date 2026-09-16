@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rat Ranching Manual</title>
+  <style>
+    :root {
+      --bg-canvas: #060911;
+      --bg-surface: #0c1220;
+      --bg-card: #121a2d;
+      --bg-card-hover: #17223b;
+      --bg-code: #080d18;
+
+      --border-subtle: #1c273e;
+      --border-medium: #283958;
+      --border-bright: #3b82f6;
+
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+
+      --accent-blue: #38bdf8;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #f87171;
+      --accent-purple: #c084fc;
+      --accent-indigo: #818cf8;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "Fira Code", Menlo, Monaco, Consolas, monospace;
+
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 2.5rem 1.25rem;
+      display: flex;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    /* Document Header */
+    header {
+      background: linear-gradient(180deg, var(--bg-surface) 0%, rgba(12, 18, 32, 0.75) 100%);
+      border: 1px solid var(--border-medium);
+      border-top: 3px solid var(--accent-blue);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem;
+    }
+
+    .meta-ribbon {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .meta-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-sm);
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    .meta-tag.source {
+      background: rgba(148, 163, 184, 0.08);
+      color: var(--text-secondary);
+      border-color: var(--border-subtle);
+    }
+
+    .meta-tag.confirmed {
+      background: rgba(52, 211, 153, 0.1);
+      color: var(--accent-emerald);
+      border-color: rgba(52, 211, 153, 0.3);
+    }
+
+    h1 {
+      font-size: 2.15rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      max-width: 980px;
+      line-height: 1.6;
+    }
+
+    /* Section Header */
+    .section-header {
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.85rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .section-num {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    /* Pipeline Flow Styles */
+    .pipeline-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .pipeline-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      width: 100%;
+      padding: 0.25rem 0;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+
+    .pipe-node {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.2rem;
+      min-width: 0;
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0.2rem;
+      position: relative;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .pipe-node:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-2px);
+      z-index: 2;
+    }
+
+    .pipe-node.hazard-kill { border-top: 2px solid var(--accent-rose); }
+    .pipe-node.hazard-eval { border-top: 2px solid var(--accent-amber); }
+    .pipe-node.hazard-growth { border-top: 2px solid var(--accent-emerald); }
+    .pipe-node.hazard-neutral { border-top: 2px solid var(--accent-blue); }
+
+    .pipe-step-num {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      color: var(--text-tertiary);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .pipe-name {
+      font-size: clamp(0.65rem, 0.78vw, 0.8rem);
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .pipe-consequence {
+      font-size: clamp(0.52rem, 0.68vw, 0.62rem);
+      font-family: var(--font-mono);
+      color: var(--accent-rose);
+      font-weight: 600;
+      line-height: 1.15;
+      text-align: center;
+      word-break: normal;
+    }
+
+    .pipe-consequence.neutral { color: var(--accent-blue); }
+    .pipe-consequence.growth { color: var(--accent-emerald); }
+    .pipe-consequence.eval { color: var(--accent-amber); }
+
+    .pipe-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.1rem;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+
+    .pipe-arrow svg {
+      width: 9px;
+      height: 9px;
+      stroke: var(--text-tertiary);
+      stroke-width: 2.2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Grids & Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .pipeline-flow {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.35rem;
+      }
+      .pipe-node {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.6rem 0.85rem;
+      }
+      .pipe-arrow {
+        transform: rotate(90deg);
+        padding: 0.15rem 0;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card:hover {
+      border-color: var(--border-medium);
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.65rem;
+      gap: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+
+    .card-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    .card-badge.good { color: var(--accent-emerald); border-color: rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.06); }
+    .card-badge.warn { color: var(--accent-amber); border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.06); }
+    .card-badge.crit { color: var(--accent-rose); border-color: rgba(248, 113, 113, 0.3); background: rgba(248, 113, 113, 0.06); }
+    .card-badge.info { color: var(--accent-blue); border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.06); }
+
+    /* Code & Formulas */
+    .formula {
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--accent-blue);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 0.75rem 0.9rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #bae6fd;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    /* Key-Value Lists */
+    .kv-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .kv-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.825rem;
+      padding: 0.25rem 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+    }
+
+    .kv-item:last-child {
+      border-bottom: none;
+    }
+
+    .kv-key {
+      color: var(--text-secondary);
+    }
+
+    .kv-val {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #ffffff;
+      text-align: right;
+    }
+
+    /* Callouts */
+    .callout {
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 0.9rem;
+      font-size: 0.825rem;
+      line-height: 1.5;
+    }
+
+    .callout.takeaway {
+      background: rgba(56, 189, 248, 0.05);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: #93c5fd;
+    }
+    .callout.takeaway strong { color: #e0f2fe; }
+
+    .callout.alert {
+      background: rgba(248, 113, 113, 0.06);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+      color: #fca5a5;
+    }
+    .callout.alert strong { color: #fee2e2; }
+
+    /* Tables */
+    .table-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      width: 100%;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 0.8rem;
+    }
+
+    th {
+      background: rgba(9, 14, 26, 0.9);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.75rem 0.7rem;
+      border-bottom: 1px solid var(--border-subtle);
+      word-wrap: break-word;
+    }
+
+    td {
+      padding: 0.75rem 0.7rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      vertical-align: middle;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.45;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    tr.row-static td {
+      background: rgba(15, 23, 42, 0.35);
+      color: var(--text-secondary);
+    }
+
+    .tag-conf {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sm);
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .tag-static {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sm);
+      background: rgba(148, 163, 184, 0.08);
+      color: var(--text-tertiary);
+      border: 1px solid var(--border-subtle);
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .tag-community {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sm);
+      background: rgba(251, 191, 36, 0.1);
+      color: var(--accent-amber);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 1.5rem;
+      margin-top: 1rem;
+      color: var(--text-tertiary);
+      font-size: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Document Header -->
+  <header>
+    <div class="meta-ribbon">
+      <span class="meta-tag">Rancher Handbook</span>
+      <span class="meta-tag confirmed">[CONFIRMED] Decompiled from GameAssembly.dll</span>
+      <span class="meta-tag source">HusbandryHelper · GeneticHelper · AnimalSpecies</span>
+    </div>
+    <h1>Rat Ranching: The Complete Field Guide</h1>
+    <p class="header-desc">
+      Everything you need to know about how rat breeding, survival, and genetics actually work under the hood. We pulled the real math straight from the game code and sanity-checked it against community testing so you can run your ranch with zero guesswork.
+    </p>
+  </header>
+
+  <!-- OVERVIEW: Execution Pipeline Diagram & Master Stat Architecture -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title">The Nightly Routine (What Happens While You Sleep)</h2>
+      <span class="card-badge warn">Runs Top-to-Bottom</span>
+    </div>
+    
+    <div class="pipeline-container">
+      <div class="pipeline-flow">
+        <!-- Step 1 -->
+        <div class="pipe-node hazard-kill">
+          <span class="pipe-step-num">STEP 01</span>
+          <span class="pipe-name">Longevity</span>
+          <span class="pipe-consequence">Old-Age Roll</span>
+        </div>
+
+        <div class="pipe-arrow">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="pipe-node hazard-neutral">
+          <span class="pipe-step-num">STEP 02</span>
+          <span class="pipe-name">Feeding</span>
+          <span class="pipe-consequence neutral">Eat from Feeder</span>
+        </div>
+
+        <div class="pipe-arrow">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="pipe-node hazard-eval">
+          <span class="pipe-step-num">STEP 03</span>
+          <span class="pipe-name">Hygiene</span>
+          <span class="pipe-consequence eval">Pen Cleanliness</span>
+        </div>
+
+        <div class="pipe-arrow">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="pipe-node hazard-eval">
+          <span class="pipe-step-num">STEP 04</span>
+          <span class="pipe-name">Immunity</span>
+          <span class="pipe-consequence eval">Natural Illness</span>
+        </div>
+
+        <div class="pipe-arrow">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="pipe-node hazard-kill">
+          <span class="pipe-step-num">STEP 05</span>
+          <span class="pipe-name">Health Update</span>
+          <span class="pipe-consequence">Regen &rarr; Sick &rarr; 0HP</span>
+        </div>
+
+        <div class="pipe-arrow">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="pipe-node hazard-kill">
+          <span class="pipe-step-num">STEP 06</span>
+          <span class="pipe-name">Crowding</span>
+          <span class="pipe-consequence">Weight Culling</span>
+        </div>
+
+        <div class="pipe-arrow">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="pipe-node hazard-eval">
+          <span class="pipe-step-num">STEP 07</span>
+          <span class="pipe-name">Fertility</span>
+          <span class="pipe-consequence eval">Mating Check</span>
+        </div>
+
+        <div class="pipe-arrow">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+
+        <!-- Step 8 -->
+        <div class="pipe-node hazard-growth">
+          <span class="pipe-step-num">STEP 08</span>
+          <span class="pipe-name">Growth</span>
+          <span class="pipe-consequence growth">Weight &amp; Poop</span>
+        </div>
+
+        <div class="pipe-arrow">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+
+        <!-- Step 9 -->
+        <div class="pipe-node hazard-growth">
+          <span class="pipe-step-num">STEP 09</span>
+          <span class="pipe-name">Mating</span>
+          <span class="pipe-consequence growth">Pair Up</span>
+        </div>
+      </div>
+
+      <div class="callout takeaway">
+        <strong>Order matters:</strong> Every night runs in this exact sequence. If a rat dies in Step 01 (old age) or Step 06 (overcrowding), it skips the rest of the night immediately. Sickness damage also resolves in Step 05 <em>before</em> overcrowding kicks in at Step 06.
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW: Master Stat Matrix -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title">Master Stat Reference &amp; Realistic Limits</h2>
+      <span class="card-badge">Engine Ground Truth</span>
+    </div>
+    
+    <div class="table-box">
+      <table>
+        <colgroup>
+          <col style="width: 14%;">
+          <col style="width: 9%;">
+          <col style="width: 11%;">
+          <col style="width: 15%;">
+          <col style="width: 15%;">
+          <col style="width: 36%;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Trait Name</th>
+            <th>Base</th>
+            <th>Hard Limits</th>
+            <th>Realistic Max</th>
+            <th>Player Records [Min / Max]</th>
+            <th>What Keeps It In Check</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Growth Rate</strong></td>
+            <td>1.0</td>
+            <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
+            <td><strong style="color: var(--accent-emerald);">~2.4 &ndash; 2.6</strong></td>
+            <td><span class="tag-conf">0.54 / 2.62</span></td>
+            <td>Climbs steadily with selective breeding, but quickly dilutes if you pair an elite rat with an average one.</td>
+          </tr>
+          <tr>
+            <td><strong>Hunger Rate</strong></td>
+            <td>65.0</td>
+            <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
+            <td><strong style="color: var(--accent-emerald);">~18 &ndash; 25</strong> <span style="font-size: 0.7rem; color: var(--text-tertiary);">(Floor)</span></td>
+            <td><span class="tag-conf">23.67 / 102.0</span></td>
+            <td>Lower is better. Step sizes shrink as the number drops, meaning progress naturally slows near the bottom.</td>
+          </tr>
+          <tr>
+            <td><strong>Longevity</strong></td>
+            <td>1.0</td>
+            <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
+            <td><strong style="color: var(--accent-emerald);">~2.2 &ndash; 2.5</strong></td>
+            <td><span class="tag-conf">0.53 / 1.63</span></td>
+            <td>Pushes back old-age death rolls, but elder weight loss always starts on Day 11 regardless.</td>
+          </tr>
+          <tr>
+            <td><strong>Immunity</strong></td>
+            <td>30.0</td>
+            <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
+            <td><strong style="color: var(--accent-emerald);">50 / 85</strong></td>
+            <td><span class="tag-conf">15.61 / 62.25</span></td>
+            <td>Natural sickness completely stops rolling at 50. Above 50 only speeds up recovery and prion defense.</td>
+          </tr>
+          <tr>
+            <td><strong>Fertility</strong></td>
+            <td>50.0</td>
+            <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
+            <td><strong style="color: var(--accent-emerald);">85 &ndash; 100</strong></td>
+            <td><span class="tag-conf">15.0% / 100.0%</span></td>
+            <td>Direct percentage roll. Any value above 100 provides zero in-game benefit.</td>
+          </tr>
+          <tr>
+            <td><strong>Litter Size</strong></td>
+            <td>3.0</td>
+            <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
+            <td><strong style="color: var(--accent-emerald);">~4.5 &ndash; 5.2</strong></td>
+            <td><span class="tag-conf">1.66 / 7.11</span></td>
+            <td>Expressed only by females. Males quietly carry the gene, which can secretly dilute your bloodline.</td>
+          </tr>
+          <tr class="row-static">
+            <td><strong>Max Health</strong></td>
+            <td>100.0</td>
+            <td><code style="color: var(--text-secondary);">[100.0, 100.0]</code></td>
+            <td><strong>100.0 (Static)</strong></td>
+            <td><span class="tag-static">N/A</span></td>
+            <td>Fixed game constant for all rats. Never mutates. (The 500 cap you see is for hunger).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 01: Step 01 - Longevity -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">01</span> Step 01: Longevity &amp; Natural Death</h2>
+      <span class="card-badge crit">Step 01 · First Thing Every Night</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">When Old-Age Rolls Start</span>
+          <span class="card-badge info">Threshold Calculation</span>
+        </div>
+        <div class="formula">CriticalDeathAge = 14 &times; Longevity
+IsPastDeathAge   = [CurrentAge &ge; CriticalDeathAge]
+DeathChance      = 0.75 &times; IsPastDeathAge</div>
+        <p style="font-size: 0.825rem; color: var(--text-secondary);">
+          Longevity isn't an execution date—it's an alarm clock for when dangerous nightly dice rolls begin:
+        </p>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Longevity 0.50 (Runts)</span>
+            <span class="kv-val">Rolls start on Day 7</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Longevity 1.00 (Standard)</span>
+            <span class="kv-val">Rolls start on Day 14</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Longevity 1.50 (Selective)</span>
+            <span class="kv-val">Rolls start on Day 21</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Survival Past the Threshold</span>
+          <span class="card-badge crit">75% Death Roll / Night</span>
+        </div>
+        <p style="font-size: 0.825rem; color: var(--text-secondary);">
+          Before the threshold age, your rat has a 0% chance of dying from old age. Once it reaches that day, it must survive a flat 75% death roll every night:
+        </p>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Before the Threshold</span>
+            <span class="kv-val" style="color: var(--accent-emerald);">100% Safe from Old Age</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">First Night Past Threshold</span>
+            <span class="kv-val">25.00% Chance to Live</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Second Night Past Threshold</span>
+            <span class="kv-val">6.25% Chance to Live</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Third Night Past Threshold</span>
+            <span class="kv-val">1.56% Chance to Live</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Fourth Night Past Threshold</span>
+            <span class="kv-val" style="color: var(--accent-rose);">0.39% Chance to Live</span>
+          </div>
+        </div>
+        <div class="callout takeaway">
+          <strong>Rancher Takeaway:</strong> Because every night is an independent coin flip, lucky rats can occasionally live for days past their threshold (e.g. out to Day 26). But practically, don't count on breeders surviving more than 48 hours once their clock rings.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 02: Step 02 - Feeding -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">02</span> Step 02: Hunger, Appetite &amp; Feeding</h2>
+      <span class="card-badge info">Step 02 · 500 Max Reservoir</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">How Appetite Drains</span>
+          <span class="card-badge info">Meter 0&ndash;500</span>
+        </div>
+        <div class="formula">HungerToday = max(0, HungerYesterday - HungerStat)
+FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Standard Daily Drain</span>
+            <span class="kv-val">65.0 Calories</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Starting Newborn Stomach</span>
+            <span class="kv-val">500 in Engine <span class="tag-conf">~125 Observed</span></span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Starvation Trigger</span>
+            <span class="kv-val">Hits 0 (Loses weight, can't mate)</span>
+          </div>
+        </div>
+        <div class="callout takeaway">
+          <strong>Picky Eaters:</strong> Rats won't touch a food item if their current hunger already covers 75% of <em>that item's</em> value (<code>FoodMaxValue &times; 0.75 &le; HungerToday</code>). This is relative to each food's own value, not a single fixed hunger number &mdash; a small snack still gets eaten well past the point a big meal would be rejected.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Penalties for Underfed Rats</span>
+          <span class="card-badge warn">Thresholds: 398 &amp; 200</span>
+        </div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Stunted Growth (Step 08)</span>
+            <span class="kv-val">&lt; 398 Calories (-1% to -50% weight gain)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Lowered Fertility (Step 07)</span>
+            <span class="kv-val">&lt; 200 Calories (Up to -40% mating odds)</span>
+          </div>
+        </div>
+        <div class="callout takeaway">
+          <strong>Breeding Goal:</strong> Breeding Hunger Rate down allows rats to stay above the 398 growth threshold for days on a single feeding.
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><span class="tag-community" style="margin-right: 0.4rem;">unverified</span>We haven't found a hunger-triggered miscarriage mechanic in <code>OnPregnant</code>/<code>HandlePregnancyProgress</code> &mdash; if this exists, we don't have decompile evidence for it yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 03: Step 03 - Hygiene -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">03</span> Step 03: Dirty Cages &amp; Room Hygiene</h2>
+      <span class="card-badge warn">Step 03 · CheckHygiene</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Waste Hazard Checks</span>
+          <span class="card-badge warn">Independent Disease Roll</span>
+        </div>
+        <div class="formula">Coverage = (FecesTiles + CorpseTiles) &divide; TotalTiles
+IsGrimy  = [0.25 &le; Coverage &lt; 0.35]
+IsFoul   = [Coverage &ge; 0.35]
+
+HygieneRollChance = 0.15 &times; IsGrimy + 0.35 &times; IsFoul
+HygieneAdd = Roll(HygieneRollChance) ? HygieneRollChance : 0
+
+SickChance_Hygiene = HygieneAdd + 0.20 &times; OvercrowdTier</div>
+        <div class="callout takeaway">
+          <strong>The 25% Waste Rule:</strong> As long as waste covers less than a quarter of your floor tiles, hygiene penalties stay at zero. Crossing 25% triggers an extra sickness check.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Pen Cleanliness Thresholds</span>
+          <span class="card-badge good">Sanitation</span>
+        </div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Clean Room (&lt; 25% waste)</span>
+            <span class="kv-val" style="color: var(--accent-emerald);">0% Risk</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Grimy Room (25%&ndash;34% waste)</span>
+            <span class="kv-val">15% roll for a +15% sick chance</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Foul Room (&ge; 35% waste)</span>
+            <span class="kv-val">35% roll for a +35% sick chance</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Dead Bodies on the Floor</span>
+            <span class="kv-val">Count as full waste tiles</span>
+          </div>
+        </div>
+        <div class="callout alert">
+          <strong>Don't Leave Corpses:</strong> Unbutchered carcasses rot and count straight toward that 25% dirty-room threshold.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 04: Step 04 - Immunity -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">04</span> Step 04: Natural Sickness &amp; Immunity</h2>
+      <span class="card-badge good">Step 04 · CheckImmunityDisease</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Random Illness Odds</span>
+          <span class="card-badge good">Natural Sickness Check</span>
+        </div>
+        <div class="formula">IsSusceptible = [Immunity &lt; 50]
+SickChance_Spontaneous = IsSusceptible &times; (0.25 - Immunity &divide; 50 &times; 0.20)</div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Immunity &ge; 50</span>
+            <span class="kv-val" style="color: var(--accent-emerald);">0% (Never catches random illness)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Immunity = 30 (Base)</span>
+            <span class="kv-val">13.00% chance each night</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Immunity = 0</span>
+            <span class="kv-val" style="color: var(--accent-rose);">25.00% chance each night</span>
+          </div>
+        </div>
+        <div class="callout takeaway">
+          <strong>The Magic Number 50:</strong> Hitting 50 Immunity shuts off spontaneous sickness completely. Pushing higher only helps with recovery speed and resisting prions.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Benefits Above 50 Immunity</span>
+          <span class="card-badge info">Scales up to 100</span>
+        </div>
+        <p style="font-size: 0.825rem; color: var(--text-secondary);">
+          While 50 protects against random illness, extra points keep scaling:
+        </p>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Daily Recovery Rate</span>
+            <span class="kv-val">Immunity &divide; 100 (100% cure at 100)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Raw Meat Prion Defense</span>
+            <span class="kv-val">100 - Immunity % (0% infection at 100)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Nightly Health Healing</span>
+            <span class="kv-val">Caps at 50 (+30 HP each night)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 05: Step 05 - Health Update & Regeneration -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">05</span> Step 05: Nightly Health, Healing &amp; Sickness Damage</h2>
+      <span class="card-badge crit">Step 05 · ModifyHealth (RVA 0x8CADE0)</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- Card 1: Sequential ModifyHealth Pipeline -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">How Health Updates Resolve</span>
+          <span class="card-badge crit">Sub-Steps 5a &rarr; 5b &rarr; 5c</span>
+        </div>
+        <div class="formula">// 5a. Nightly Health Healing (Runs for all rats, sick or not)
+Regen = min(0.3 &times; MaxHealth, ((Immunity - 25) &divide; 25) &times; 0.3 &times; MaxHealth)
+ModifyHealth(Regen)
+
+// 5b. Sickness Damage &amp; Recovery
+if IsSick == 1:
+    ModifyHealth(-0.25 &times; MaxHealth)   // Hits before recovery is rolled
+    if Roll(Immunity &divide; 100):
+        IsSick = 0                         // Cured for tomorrow
+
+// 5c. Death Check
+if Health &le; 0: OnAnimalDead(rat)</div>
+        <div class="callout alert">
+          <strong>Low Immunity Bleed:</strong> Healing has no floor clamp. Below 25 Immunity, healthy rats bleed health every night. At 0 Immunity, a rat loses 30 HP nightly and dies in 4 days with no disease involved.
+        </div>
+        <div class="callout takeaway">
+          <strong>Damage Lands First:</strong> Sickness damage hits before the rat gets a chance to shake it off. A recovering rat takes -25 HP tonight, and the cure only takes effect tomorrow.
+        </div>
+      </div>
+
+      <!-- Card 2: Dispatch Architecture & Verification Boundaries -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Under the Hood: Health Events</span>
+          <span class="card-badge info">Decompiled RVA Tracing</span>
+        </div>
+        <p style="font-size: 0.825rem; color: var(--text-secondary);">
+          <code>ModifyHealth</code> (RVA <code>0x8CADE0</code>) doesn't write health directly; it fires an event with <code>{CurrentHealth, Delta, MaxHealth}</code>:
+        </p>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Sequential Updates</span>
+            <span class="kv-val">Regen and sickness fire separately</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">0 HP Death Check</span>
+            <span class="kv-val" style="color: var(--accent-emerald);">[CONFIRMED] Explicitly checked in DayEnd</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Upper Health Cap</span>
+            <span class="kv-val" style="color: var(--accent-amber);">[UNVERIFIED] Handled downstream by game</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Species Max Health</span>
+            <span class="kv-val">100.0 (AnimalSpecies.cctor)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">SetHealthToZero</span>
+            <span class="kv-val" style="color: var(--text-tertiary);">RVA 0x8CCB60 (Unused in night loop)</span>
+          </div>
+        </div>
+        <div class="callout takeaway">
+          <strong>Key Takeaway:</strong> Rats definitely die the instant health hits 0. Whether health can glitch past 100 HP is handled downstream, but 100 is the design target.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 06: Step 06 - Overcrowding -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">06</span> Step 06: Overcrowding &amp; Why Runts Die First</h2>
+      <span class="card-badge crit">Step 06 · Instant Death Check</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Cramped Cage Tiers</span>
+          <span class="card-badge crit">Instant Execution</span>
+        </div>
+        <div class="formula">Occupancy = RatTiles &divide; TotalTiles
+Tier = [Occupancy &ge; 0.55] + [Occupancy &ge; 0.70] + [Occupancy &ge; 0.90]
+
+Tier 0 (&lt;0.55): Completely safe
+Tier 1 (0.55&ndash;0.69): No deaths (only boosts dirty-cage sickness odds)
+Tier 2 (0.70&ndash;0.89): 5% death roll per rat each night
+Tier 3 (&ge;0.90):      15% death roll per rat each night</div>
+        <div class="callout alert">
+          <strong>Instant Kill:</strong> Overcrowding is not a damage tick—it's an instant kill. The game always picks the lightest living rat that weighs less than the rat rolling the check. Runts and newborns die first.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Roommate Turn Order</span>
+          <span class="card-badge warn">Step 06 Timing</span>
+        </div>
+        <p style="font-size: 0.825rem; color: var(--text-secondary);">
+          Runs at Step 06 (after feeding and health updates, but before fertility, growth, and mating). Any rat killed by crowding gets no weight gain and cannot mate.
+        </p>
+        <div class="callout takeaway">
+          <strong>Chain Reaction:</strong> Rats check overcrowding one by one. If an earlier check kills a runt, the pen clears up slightly, which can spare the next rat in line.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 07: Step 07 - Fertility Evaluation -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">07</span> Step 07: Fertility &amp; Stacking Penalties</h2>
+      <span class="card-badge eval">Step 07 · Effective Odds</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Effective Fertility Math</span>
+          <span class="card-badge">Base 50.0</span>
+        </div>
+        <div class="formula">HungerPenalty = max(0, (200 - Hunger) &divide; 200) &times; 0.40
+
+EffectiveFertility = max(0, StatFertility &times; (1 - HungerPenalty 
+                     - 0.15&times;IsElder - 0.75&times;IsSick - 0.20&times;Tier))</div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Being Sick</span>
+            <span class="kv-val" style="color: var(--accent-rose);">-75% Fertility</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Hunger Below 200</span>
+            <span class="kv-val">Scales down up to -40%</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Overcrowded Pen</span>
+            <span class="kv-val">-20% per Tier</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Elder Stage (Day 11+)</span>
+            <span class="kv-val">-15% Fertility</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">The Partner Bottleneck</span>
+          <span class="card-badge info">Mating Gating</span>
+        </div>
+        <p style="font-size: 0.825rem; color: var(--text-secondary);">
+          Step 07 locks in each rat's effective fertility for tonight's mating in Step 09.
+        </p>
+        <div class="callout takeaway">
+          <strong>The Weak Link Rule:</strong> Pregnancy chance uses <code>min(Fertility_A, Fertility_B)</code>, not the average. If your stud male has 90% fertility but is paired with a sick 15% female, your odds are stuck at 15%. Keep both partners healthy!
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 08: Step 08 - Somatic Growth & Butchery -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">08</span> Step 08: Daily Growth, Poop &amp; Meat Cuts</h2>
+      <span class="card-badge good">Step 08 · Weight &amp; Butchery</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- Growth Stages Card -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Growth Stages &amp; Daily Gains</span>
+          <span class="card-badge good">Base 1.0</span>
+        </div>
+        <div class="formula">WeightGain = StageRate &times; GrowthRate &times; (1 - HungerPenalty)
+Hunger &lt; 398: Penalty = max(0, 0.50 - 0.49 &times; H &divide; 398)</div>
+        <div class="table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Stage</th>
+                <th>Age (Days)</th>
+                <th>Daily Weight Gain</th>
+                <th>Stage Bonus / Penalty</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Infant</td><td>0</td><td>+75g / night</td><td>+5g instant bonus on birth</td></tr>
+              <tr><td>Juvenile</td><td>1 &ndash; 2</td><td>+75g / night</td><td>None</td></tr>
+              <tr><td>Adolescent</td><td>3 &ndash; 4</td><td>+75g / night</td><td>None</td></tr>
+              <tr><td>Adult</td><td>5 &ndash; 10</td><td>+17g / night</td><td>None</td></tr>
+              <tr><td>Elder</td><td>11+</td><td>-17g / night</td><td>-17g instant penalty on entry</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout alert">
+          <strong>Elder Shrinkage:</strong> Elders lose 17g every night, and that loss scales with Growth Rate. Fast-growing rats shrink fastest in old age. Harvest on Day 10 before shrinkage starts!
+        </div>
+      </div>
+
+      <!-- Butchery & Poop Card -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Butcher Cuts &amp; Droppings</span>
+          <span class="card-badge info">Discrete Modulo</span>
+        </div>
+        <div class="formula">EffectiveWeight = Weight &times; (1 - 0.25 &times; IsSick)
+
+StandardCuts = floor(EffectiveWeight &divide; 400)
+SmallCuts    = floor((EffectiveWeight mod 400) &divide; 200)
+Morsels      = floor((EffectiveWeight mod 200) &divide; 100)
+SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Poop Trigger</span>
+            <span class="kv-val">Gaining &gt;29g in a single night</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Poop Size Thresholds</span>
+            <span class="kv-val">&lt;600g / 600&ndash;999g / &ge;1000g</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Small Morsel Rounding</span>
+            <span class="kv-val">Always rounds UP (ceil)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Best Slaughter Day</span>
+            <span class="kv-val">Day 10 (Peak weight before elder loss)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 09: Step 09 - Mating Allocation -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">09</span> Step 09: Mating &amp; How Litters Are Rolled</h2>
+      <span class="card-badge good">Step 09 · Final Nightly Step</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- Mating Mechanics -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Mating Attempts &amp; Ratios</span>
+          <span class="card-badge">CheckMate</span>
+        </div>
+        <div class="formula">PregnancyChance = min(EffectiveFertility_A, EffectiveFertility_B)</div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Attempts Per Rat</span>
+            <span class="kv-val">Up to 3 attempts every night</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Failed Attempts</span>
+            <span class="kv-val">Missed rolls still burn an attempt</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Ongoing Pregnancies</span>
+            <span class="kv-val">No limit (Does not lock the male)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Best Breeding Ratio</span>
+            <span class="kv-val">1 Male : 4&ndash;6 Females <span class="tag-community">unverified</span></span>
+          </div>
+        </div>
+        <div class="callout takeaway">
+          <strong>Harem Sizing:</strong> The 3-attempt limit resets fresh every night, so a single male isn't hard-capped at one partner. We haven't derived an optimal ratio from the decompile, though &mdash; the 4&ndash;6 figure is a reasonable-sounding estimate, not something we've traced back to a formula.
+        </div>
+      </div>
+
+      <!-- Litter Size Card -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Litter Sizes &amp; Species Variance</span>
+          <span class="card-badge">Moms Only</span>
+        </div>
+        <div class="formula">GuaranteedPups = floor(LitterStat)
+ExtraPupChance = frac(LitterStat)
+TotalPups = max(1, GuaranteedPups + ExtraPupRoll + Random(&plusmn;Variance))</div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Species Baseline</span>
+            <span class="kv-val">3.0 Pups</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Built-in Variance</span>
+            <span class="kv-val">Flat constant (=1 for rats) <span class="tag-conf">[CONFIRMED]</span></span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Variance Mutation</span>
+            <span class="kv-val">Static tag; never changes or mutates</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Female-Only Trait</span>
+            <span class="kv-val">Carried by males, expressed by females</span>
+          </div>
+        </div>
+        <div class="callout takeaway">
+          <strong>Real-World Example:</strong> A 3.8 Litter Stat gives 3 guaranteed pups, an 80% shot at a 4th, plus the species variance swing of &plusmn;1 pup (giving you 2 to 5 pups total).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 10: Genetics & Mutation Engine -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">10</span> Inheriting Genes &amp; The Mutation Engine</h2>
+      <span class="card-badge">GeneticHelper.dll</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- Inheritance Mechanics -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Passing Down Genes</span>
+          <span class="card-badge">Punnett Square Model</span>
+        </div>
+        <div class="formula">Child.AlleleA = Mutate(MotherContribution, Baseline)
+Child.AlleleB = Mutate(FatherContribution, Baseline)
+
+Phenotype = (Child.AlleleA + Child.AlleleB) &divide; 2</div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Mother's Contribution</span>
+            <span class="kv-val">50/50 Coin Flip (Allele A vs B)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Father's Contribution</span>
+            <span class="kv-val">Snapshotted at mating (StorePartnerGenes)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Wild-Caught Spawns</span>
+            <span class="kv-val">Baseline &times; Avg(2 draws from [0.5, 1.5])</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Inbreeding Penalty</span>
+            <span class="kv-val">Zero (Checks baseline, not family trees)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Offspring Sex</span>
+            <span class="kv-val">Straight 50/50 Coin Flip</span>
+          </div>
+        </div>
+        <div class="callout takeaway">
+          <strong>No Inbreeding Downsides:</strong> Inbreeding carries zero mechanical penalty. The game compares genetics against the species baseline, not lineage.
+        </div>
+      </div>
+
+      <!-- Mutation Formula -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">How Mutations Roll</span>
+          <span class="card-badge">12 Rolls Per Newborn</span>
+        </div>
+        <div class="formula">Deviation  = |Value - Baseline| &divide; Baseline
+Resistance = 1 - 1 &divide; (2 &times; Deviation + 1)
+Magnitude  = 0.08 &times; (1 - Resistance) &times; (1 + 2 &times; WideRollSuccess)
+
+Pullback   = 0.25 &times; Magnitude &times; Resistance  [Pulls toward Baseline]
+
+NewValue   = max(0.01, Value &times; [1 + MutRoll &times; (Random(&plusmn;Mag) + Pullback)])</div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Mutation Chance</span>
+            <span class="kv-val">15% per allele / birth</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Wide Jackpot Roll</span>
+            <span class="kv-val">5% chance to triple the jump (0.24 base)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Max Step Size</span>
+            <span class="kv-val">0.04 &times; Baseline (at high drift)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Max Pullback Drag</span>
+            <span class="kv-val">0.01 &times; Baseline (at high drift)</span>
+          </div>
+        </div>
+        <div class="callout alert">
+          <strong>Built-in Forward Bias:</strong> The forward jump (+1.0&times;Mag) beats the maximum backward pull (-0.25&times;Mag). About 37.5% of successful mutations produce net positive drift.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 11: Theory vs Reality -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">11</span> Why Breeding Hits a Wall Around 2.5&times; to 2.6&times;</h2>
+      <span class="card-badge warn">Colony Dynamics</span>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">In Pure Code: No True Ceiling</span>
+          <span class="card-badge good">Step Size Stays Constant</span>
+        </div>
+        <p style="font-size: 0.825rem; color: var(--text-secondary);">
+          Even at extreme stats, the absolute jump size never shrinks to zero:
+        </p>
+        <div class="formula">AbsoluteStep     = Value &times; Magnitude &rarr; 0.04 &times; Baseline (Regular)
+AbsolutePullback = 0.25 &times; AbsoluteStep &rarr; 0.01 &times; Baseline (Regular)
+
+NetMaxStep (Regular) = +0.03 &times; Baseline
+NetMaxStep (Wide)    = +0.09 &times; Baseline (3&times; Step, 3&times; Pullback)</div>
+        <p style="font-size: 0.825rem; color: var(--text-secondary);">
+          Because the step size never vanishes, strict elite pairs can climb indefinitely in code.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">In Practice: The Casual Plateau</span>
+          <span class="card-badge warn">Stalls Around ~2.4 &ndash; 2.6x</span>
+        </div>
+        <div class="kv-list">
+          <div class="kv-item">
+            <span class="kv-key">Positive Mutation Chance</span>
+            <span class="kv-val">5.625% per allele birth</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Negative Drag Chance</span>
+            <span class="kv-val">9.375% (1.67&times; more frequent)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Wide Positive Mutation</span>
+            <span class="kv-val">0.28% per allele birth</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Gain on a Single Hit</span>
+            <span class="kv-val">+0.015 (Regular) / +0.045 (Wide)</span>
+          </div>
+        </div>
+        <div class="callout takeaway">
+          <strong>The Dilution Trap:</strong> Pairing an elite 2.60 rat with a 2.40 rat resets the offspring's starting baseline to 2.50. Making up that 0.10 gap requires multiple rare positive mutations before old age claims the parents. In mixed pens, progress naturally grinds to a halt around 2.4&ndash;2.6&times;.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 12: Prion Pathology -->
+  <section>
+    <div class="section-header">
+      <h2 class="section-title"><span class="section-num">12</span> Prion Disease (Why You Never Feed Them Rat Meat)</h2>
+      <span class="card-badge crit">Colony Collapse Hazard</span>
+    </div>
+
+    <div class="card">
+      <div class="formula">IsFoodFlagged = [Food already carries Prion flag]
+InfectionChance = 1.0 - (1.0 - IsFoodFlagged) &times; (Immunity &divide; 100)
+
+On Infection: Permanent -20% penalty applied simultaneously to Growth, Immunity, and Longevity.</div>
+      
+      <div class="grid-2" style="margin-top: 0.5rem;">
+        <div class="callout alert">
+          <strong>Contaminated Feeders:</strong> Meat already carrying the Prion flag infects rats 100% of the time, ignoring immunity completely. Clean raw meat rolls <code>1 - Immunity/100</code>.
+        </div>
+        <div class="callout takeaway">
+          <strong>Vicious Cycle:</strong> Butchering an infected rat permanently tags all resulting meat cuts. Feeding that meat back to your pen will ruin your entire colony's gene pool.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>Rat Ranching Field Manual · Decompiled Engine Specifications</span>
+    <span>GameAssembly.dll · Assembly-CSharp.dll · Verified Mechanics Reference</span>
+  </footer>
+
+</div></body>
+</html>
