@@ -475,6 +475,94 @@
       white-space: nowrap;
     }
 
+    /* Math deep-dive */
+    .math-details {
+      margin-top: -0.5rem;
+    }
+
+    .math-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-sm);
+      background: rgba(192, 132, 252, 0.08);
+      color: var(--accent-purple);
+      border: 1px solid rgba(192, 132, 252, 0.3);
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+      width: fit-content;
+    }
+
+    .math-toggle::-webkit-details-marker { display: none; }
+
+    .math-toggle:hover {
+      background: rgba(192, 132, 252, 0.14);
+    }
+
+    .math-toggle::before {
+      content: "\2211";
+      font-size: 0.85rem;
+    }
+
+    .math-details[open] .math-toggle::after {
+      content: "\2212";
+    }
+
+    .math-details:not([open]) .math-toggle::after {
+      content: "+";
+    }
+
+    .math-panel {
+      margin-top: 0.75rem;
+      background: var(--bg-code);
+      border: 1px solid rgba(192, 132, 252, 0.25);
+      border-left: 3px solid var(--accent-purple);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .math-block {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.85;
+      color: #d8b4fe;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .math-block .comment {
+      color: var(--text-tertiary);
+      font-style: italic;
+    }
+
+    .math-label {
+      font-family: 'Segoe UI', var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent-purple);
+      margin-bottom: -0.5rem;
+    }
+
+    .math-note {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      padding-top: 0.75rem;
+    }
+
+    .math-note b { color: var(--text-main); }
+
     /* Game art */
     .pixel-art {
       image-rendering: pixelated;
@@ -867,6 +955,26 @@
       <span class="card-badge crit">Step 01 · First Thing Every Night</span>
     </div>
 
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">State &amp; Threshold</div>
+        <div class="math-block">a &isin; &#8469;&#8320;  (age, days)      g<sub>long</sub> &isin; &#8477;&#8314;  (Longevity trait)      &alpha; &isin; {0,1}  (alive/dead)
+
+A<sub>crit</sub> = 14 &times; g<sub>long</sub>
+&chi;<sub>senescent</sub> = [a &ge; A<sub>crit</sub>]
+P(Mortality | a) = 0.75 &times; &chi;<sub>senescent</sub>
+
+&alpha;&prime; = &alpha; &times; (1 &minus; Bernoulli(P(Mortality)))</div>
+        <div class="math-label">Multi-Night Survival</div>
+        <div class="math-block">P(survive k more nights | senescent) = (1 &minus; 0.75)<sup>k</sup> = 0.25<sup>k</sup> = 4<sup>&minus;k</sup>
+
+lim<sub>k&rarr;&infin;</sub> P(survive) = 0
+P(k=1) = 25.00%     P(k=2) = 6.25%     P(k=4) &asymp; 0.39%</div>
+        <p class="math-note">Every night past <code>A<sub>crit</sub></code> is an independent Bernoulli trial &mdash; survival probability decays geometrically, never resetting and never reaching a guaranteed-death floor.</p>
+      </div>
+    </details>
+
     <div class="grid-2">
       <div class="card">
         <div class="card-head">
@@ -939,6 +1047,23 @@ DeathChance      = 0.75 &times; IsPastDeathAge</div>
       <span class="card-badge info">Step 02 · 500 Max Reservoir</span>
     </div>
 
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Basal Depletion &amp; Ingestion Gate</div>
+        <div class="math-block">H &isin; [0, 500]  (Hunger reservoir)      g<sub>hunger</sub> &isin; &#8477;&#8314;
+
+H<sub>drain</sub> = max(0, H &minus; g<sub>hunger</sub>)
+
+<span class="comment">// for a food item F with caloric value F_kcal:</span>
+RejectFood(F) = [H<sub>drain</sub> &ge; 0.75 &times; F<sub>kcal</sub>]
+
+H&prime; = min(500, H<sub>drain</sub> + min(F<sub>kcal</sub>, 500 &minus; H<sub>drain</sub>))
+Starvation(t) = [H&prime; = 0]</div>
+        <p class="math-note"><b>Correction to a common claim:</b> the rejection threshold is <b>relative to each food item's own value</b> (<code>0.75 &times; F<sub>kcal</sub></code>), not a fixed Hunger number like "425." A small snack keeps getting eaten well past the point a big meal would be turned down.</p>
+      </div>
+    </details>
+
     <div class="grid-2">
       <div class="card">
         <div class="card-head">
@@ -996,6 +1121,27 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
       <h2 class="section-title"><span class="section-num">03</span> Step 03: Dirty Cages &amp; Room Hygiene</h2>
       <span class="card-badge warn">Step 03 · CheckHygiene</span>
     </div>
+
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Two-Stage Environmental Infection</div>
+        <div class="math-block">&Theta;<sub>waste</sub> = (N<sub>feces</sub> + N<sub>corpse</sub>) &divide; N<sub>tiles</sub>  &isin; [0, 1]
+
+IsGrimy = [0.25 &le; &Theta;<sub>waste</sub> &lt; 0.35]
+IsFoul  = [&Theta;<sub>waste</sub> &ge; 0.35]
+
+<span class="comment">// Stage 1 - payout roll</span>
+P<sub>roll</sub> = 0.15 &times; IsGrimy + 0.35 &times; IsFoul
+&Delta;P = Bernoulli(P<sub>roll</sub>) &times; P<sub>roll</sub>
+
+<span class="comment">// Stage 2 - the actual infection roll</span>
+P(Sick<sub>Hygiene</sub>) = &Delta;P + 0.20 &times; Tier
+
+&sigma;&prime; = &sigma; &or; Bernoulli(P(Sick<sub>Hygiene</sub>))</div>
+        <p class="math-note">Two independent Bernoulli trials, not one addition: Stage 1 decides whether &Delta;P fires at all (at the same rate as its own payout &mdash; 15% chance of +0.15, 35% chance of +0.35), then Stage 2 uses that result plus the flat overcrowding term as the probability of a second, separate roll that actually flips the Sick flag.</p>
+      </div>
+    </details>
 
     <div class="grid-2">
       <div class="card">
@@ -1058,6 +1204,25 @@ SickChance_Hygiene = HygieneAdd + 0.20 &times; OvercrowdTier</div>
       <span class="card-badge good">Step 04 · CheckImmunityDisease</span>
     </div>
 
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Spontaneous Disease Roll</div>
+        <div class="math-block">g<sub>imm</sub> &isin; &#8477;&#8314;  (Immunity trait)      threshold = 50.0
+
+&chi;<sub>susceptible</sub> = [g<sub>imm</sub> &lt; 50.0]
+P(Sick<sub>Spontaneous</sub>) = &chi;<sub>susceptible</sub> &times; (0.25 &minus; (g<sub>imm</sub> &divide; 50.0) &times; 0.20)
+
+g<sub>imm</sub> = 0.0   &rArr;  P(Sick) = 0.250
+g<sub>imm</sub> = 30.0  &rArr;  P(Sick) = 0.130
+g<sub>imm</sub> = 49.9  &rArr;  P(Sick) &asymp; 0.0504
+g<sub>imm</sub> &ge; 50.0 &rArr;  P(Sick) &equiv; 0.000
+
+&sigma;&prime; = &sigma; &or; Bernoulli(P(Sick<sub>Spontaneous</sub>))</div>
+        <p class="math-note">Immunity 50 is a hard cutoff, not a smooth asymptote &mdash; the linear term would still be 0.05 at exactly 50 if it kept going, but the branch condition zeroes it out entirely at that point.</p>
+      </div>
+    </details>
+
     <div class="grid-2">
       <div class="card">
         <div class="card-head">
@@ -1117,6 +1282,31 @@ SickChance_Spontaneous = IsSusceptible &times; (0.25 - Immunity &divide; 50 &tim
       <h2 class="section-title"><span class="section-num">05</span> Step 05: Nightly Health, Healing &amp; Sickness Damage</h2>
       <span class="card-badge crit">Step 05 · ModifyHealth (RVA 0x8CADE0)</span>
     </div>
+
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Sub-Step A &mdash; Regeneration (Unconditional)</div>
+        <div class="math-block">HP &isin; [0, 100]   HP<sub>max</sub> = 100.0
+
+&Delta;HP<sub>regen</sub> = min(0.30 &times; HP<sub>max</sub>, ((g<sub>imm</sub> &minus; 25.0) &divide; 25.0) &times; 0.30 &times; HP<sub>max</sub>)
+HP<sup>(a)</sup> = HP + &Delta;HP<sub>regen</sub>
+
+g<sub>imm</sub>=0  &rArr; &Delta;HP<sub>regen</sub> = &minus;30.0 HP/night
+g<sub>imm</sub>=25 &rArr; &Delta;HP<sub>regen</sub> = 0.0
+g<sub>imm</sub>&ge;50 &rArr; &Delta;HP<sub>regen</sub> = +30.0 HP/night (capped)</div>
+        <div class="math-label">Sub-Step B &mdash; Sickness Damage &amp; Recovery</div>
+        <div class="math-block"><span class="comment">// if sigma = 1 (sick), damage lands before recovery is even rolled:</span>
+HP<sup>(b)</sup> = HP<sup>(a)</sup> &minus; 0.25 &times; HP<sub>max</sub>
+P(Recovery) = g<sub>imm</sub> &divide; 100.0
+&sigma;&prime; = &sigma; &times; (1 &minus; Bernoulli(P(Recovery)))
+
+<span class="comment">// if sigma = 0: HP(b) = HP(a) and sigma' stays 0</span></div>
+        <div class="math-label">Sub-Step C &mdash; Death Check</div>
+        <div class="math-block">&alpha;&prime; = &alpha; &times; [HP<sup>(b)</sup> &gt; 0]</div>
+        <p class="math-note">Regen has no floor of its own &mdash; only the death check stops the slide, and only at exactly 0. A cure rolled tonight still lets tonight's &minus;25 HP land; it only stops <em>tomorrow's</em> damage.</p>
+      </div>
+    </details>
 
     <div class="grid-2">
       <!-- Card 1: Health formula -->
@@ -1193,6 +1383,24 @@ Health = Health + Regen + SicknessDamage</div>
       <span class="card-badge crit">Step 06 · Instant Death Check</span>
     </div>
 
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Occupancy, Tier &amp; Victim Selection</div>
+        <div class="math-block">&rho; = RatTiles &divide; TotalTiles  &isin; [0, 1]
+Tier(&rho;) = [&rho; &ge; 0.55] + [&rho; &ge; 0.70] + [&rho; &ge; 0.90]  &isin; {0,1,2,3}
+
+P(Cull | Tier) = 0.00,  Tier &isin; {0, 1}
+              = 0.05,  Tier = 2
+              = 0.15,  Tier = 3
+
+<span class="comment">// on a successful roll:</span>
+Victim(i) = argmin<sub>j: alive, W<sub>j</sub> &lt; W<sub>i</sub></sub> W<sub>j</sub>
+&alpha;&prime;<sub>Victim(i)</sub> = 0   <span class="comment">// instant kill, HP bypassed entirely</span></div>
+        <p class="math-note">Checked once per rat per night. A rat processed later in the same pass already sees whatever earlier roommates' checks (and any new litters or feces) produced moments before.</p>
+      </div>
+    </details>
+
     <div class="grid-2">
       <div class="card">
         <div class="card-head">
@@ -1232,6 +1440,22 @@ Tier 3 (&ge;0.90):      15% death roll per rat each night</div>
       <h2 class="section-title"><span class="section-num">07</span> Step 07: Fertility &amp; Stacking Penalties</h2>
       <span class="card-badge warn">Step 07 · Effective Odds</span>
     </div>
+
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Compounding Attenuation &amp; Weak-Link Conception</div>
+        <div class="math-block">g<sub>fert</sub> &isin; &#8477;&#8314;   H &isin; [0, 500]
+
+<span class="comment">// hunger penalty only applies below 200, exact and linear:</span>
+&Pi;<sub>hunger</sub>(H) = max(0, (200 &minus; H) &divide; 200) &times; 0.40
+
+F<sub>eff</sub> = max(0, g<sub>fert</sub> &times; [1 &minus; &Pi;<sub>hunger</sub> &minus; 0.15&times;[Elder] &minus; 0.75&times;&sigma; &minus; 0.20&times;Tier])
+
+P(Conception | A, B) = min(F<sub>eff</sub>(A), F<sub>eff</sub>(B)) &divide; 100.0</div>
+        <p class="math-note">Four independent linear deductions stack multiplicatively against the same base, then conception probability is gated by whichever partner's <b>effective</b> fertility is lower &mdash; not the average of the two.</p>
+      </div>
+    </details>
 
     <div class="grid-2">
       <div class="card">
@@ -1284,6 +1508,36 @@ EffectiveFertility = max(0, StatFertility &times; (1 - HungerPenalty
       <h2 class="section-title"><span class="section-num">08</span> Step 08: Daily Growth, Poop &amp; Meat Cuts</h2>
       <span class="card-badge good">Step 08 · Weight &amp; Butchery</span>
     </div>
+
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Stage-Dependent Growth &amp; Entry Bonuses</div>
+        <div class="math-block">W &isin; &#8477;&#8314;  (body mass, g)   a &isin; &#8469;&#8320;  (age, days)
+
+R(a) = +75.0 g/night,  0 &le; a &le; 4   <span class="comment">// Infant/Juvenile/Adolescent</span>
+     = +17.0 g/night,  5 &le; a &le; 10  <span class="comment">// Adult</span>
+     = &minus;17.0 g/night, a &ge; 11     <span class="comment">// Elder</span>
+
+&Delta;W<sub>entry</sub>(a) = +5.0&times;[a=0] &minus; 17.0&times;[a=11]   <span class="comment">// one-time, on stage transition</span>
+
+&Pi;<sub>growth</sub>(H) &asymp; max(0.01, 0.50 &minus; 0.49&times;(H&divide;398))   for 0 &lt; H &lt; 398
+                                       <span class="comment">// community-sourced curve, not decompiled</span>
+
+&Delta;W = R(a) &times; g<sub>growth</sub> &times; (1 &minus; &Pi;<sub>growth</sub>(H&prime;))    if H&prime; &gt; 0
+W&prime; = max(0.01, W + &Delta;W + &Delta;W<sub>entry</sub>(a))</div>
+        <div class="math-label">Feces Tier &amp; Butchery Partition</div>
+        <div class="math-block">TriggerPoop = [&Delta;W &gt; 29.0]
+Tier<sub>feces</sub> = 2&times;[W&prime;&ge;1000] + 1&times;[600&le;W&prime;&lt;1000] + 0&times;[W&prime;&lt;600]
+
+W<sub>eff</sub> = W &times; (1 &minus; 0.25 &times; &sigma;)
+C<sub>Standard</sub>    = &lfloor; W<sub>eff</sub> &divide; 400 &rfloor;
+C<sub>SmallCut</sub>    = &lfloor; (W<sub>eff</sub> mod 400) &divide; 200 &rfloor;
+C<sub>Morsel</sub>      = &lfloor; (W<sub>eff</sub> mod 200) &divide; 100 &rfloor;
+C<sub>SmallMorsel</sub> = &lceil; (W<sub>eff</sub> mod 100) &divide; 50 &rceil;</div>
+        <p class="math-note">The stage-rate table and hunger-penalty curve above are the community's measured approximation, not a literal decompiled read &mdash; we traced the real weight-change function and confirmed it interpolates against a per-species <code>weightStages</code> array we haven't fully extracted. Everything in the Butchery block, by contrast, is decompiled and exact.</p>
+      </div>
+    </details>
 
     <div class="grid-2">
       <!-- Growth Stages Card -->
@@ -1365,6 +1619,30 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
       <span class="card-badge good">Step 09 · Final Nightly Step</span>
     </div>
 
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Attempt Allocation</div>
+        <div class="math-block">N<sub>attempts</sub>(i) &le; 3   per rat, per night, against a shuffled pool of
+                            eligible non-pregnant opposite-sex roommates
+
+<span class="comment">// each attempt targets a DISTINCT partner - never the same rat twice</span>
+<span class="comment">// a failed roll still decrements the attempt; ongoing pregnancies do</span>
+<span class="comment">// not reduce a male's attempt budget</span></div>
+        <div class="math-label">Gestation Progression &amp; Litter Size</div>
+        <div class="math-block"><span class="comment">// every night while pregnant:</span>
+&gamma;&prime; = 0,          if [status flag active] &and; Bernoulli(0.75)   <span class="comment">// miscarriage</span>
+     = &gamma; + 1,      if pregnant and progress &lt; duration
+     = 0 (birth fires), if progress = duration
+
+<span class="comment">// at parturition:</span>
+N<sub>pups</sub> = max(1, &lfloor;g<sub>litter</sub>&rfloor; + Bernoulli(frac(g<sub>litter</sub>)) + &Delta;<sub>var</sub>)
+&Delta;<sub>var</sub> &sim; Uniform{&minus;1, 0, +1}     <span class="comment">// flat species constant, variance=1 for rats</span>
+frac(x) = x &minus; &lfloor;x&rfloor;</div>
+        <p class="math-note"><b>Hedge, deliberately:</b> we've confirmed the 75%/night miscarriage roll itself in <code>HandlePregnancyProgress</code>, and that the gating flag also exempts a rat from a low-hunger growth penalty elsewhere in the code &mdash; strongly suggesting starvation. But we can't certify the trigger is <em>exactly</em> Hunger=0, or state the exact pregnancy-duration constant, since neither was fully isolated in the decompile. Variance is confirmed to be a flat, non-genetic per-species tag (not run through <code>Mutate()</code>); we're less certain it's specifically a discrete {&minus;1,0,+1} draw versus some other bounded distribution.</p>
+      </div>
+    </details>
+
     <div class="grid-2">
       <!-- Mating Mechanics -->
       <div class="card">
@@ -1440,6 +1718,30 @@ TotalPups = max(1, GuaranteedPups + ExtraPupRoll + Random(&plusmn;Variance))</di
       <h2 class="section-title"><span class="section-num">10</span> Inheriting Genes &amp; The Mutation Engine</h2>
       <span class="card-badge">GeneticHelper.dll</span>
     </div>
+
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Allele Segregation</div>
+        <div class="math-block"><span class="comment">// per trait k, independent coin flips J,K in {1,2}, each p=0.5:</span>
+A<sub>child,1</sub><sup>(k)</sup> = &#119872;(A<sub>mother,J</sub><sup>(k)</sup>, B<sub>k</sub>)
+A<sub>child,2</sub><sup>(k)</sup> = &#119872;(A<sub>father,K</sub><sup>(k)</sup>, B<sub>k</sub>)
+
+g<sub>k</sub>(child) = (A<sub>child,1</sub><sup>(k)</sup> + A<sub>child,2</sub><sup>(k)</sup>) &divide; 2</div>
+        <div class="math-label">Mutation Operator &#119872;(V, B)</div>
+        <div class="math-block">D = |V &minus; B| &divide; B                              <span class="comment">// relative deviation</span>
+R(D) = 1 &minus; 1&divide;(2D+1) = 2D&divide;(2D+1)  &isin; [0, 1)      <span class="comment">// resistance</span>
+M(D,W) = 0.08 &times; (1&minus;R(D)) &times; (1+2W) = 0.08(1+2W)&divide;(2D+1)   <span class="comment">// magnitude</span>
+Pullback(D,W,V) = 0.25 &times; M(D,W) &times; R(D) &times; sgn(B&minus;V)
+
+&#119872;(V,B) = max(0.01, V &times; [1 + M<sub>roll</sub> &times; (u&middot;M(D,W) + Pullback)])
+
+M<sub>roll</sub> &sim; Bernoulli(0.15)    <span class="comment">// does a mutation occur at all</span>
+W      &sim; Bernoulli(0.05)    <span class="comment">// wide roll, checked only if M_roll=1</span>
+u      &sim; Uniform(&minus;1, 1)  <span class="comment">// perturbation direction &amp; magnitude</span></div>
+        <p class="math-note">Twelve independent evaluations of &#119872; per birth &mdash; one per allele, six stats, two alleles each. Resistance is measured purely against the species baseline <code>B</code>, never against parental lineage, which is exactly why inbreeding carries zero mechanical penalty here.</p>
+      </div>
+    </details>
 
     <div class="grid-2">
       <!-- Inheritance Mechanics -->
@@ -1524,6 +1826,33 @@ NewValue   = max(0.01, Value &times; [1 + MutRoll &times; (Random(&plusmn;Mag) +
       <span class="card-badge warn">Colony Dynamics</span>
     </div>
 
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Asymptotic Step Size (D &rarr; &infin;, V = B(1+D))</div>
+        <div class="math-block">lim<sub>D&rarr;&infin;</sub> (V &times; M(D,W)) = 0.04 &times; B &times; (1+2W)
+lim<sub>D&rarr;&infin;</sub> (V &times; Pullback) = &minus;0.01 &times; B &times; (1+2W)
+
+&Delta;V<sub>&infin;</sub> = B(1+2W) &times; (0.04u &minus; 0.01),   u &sim; Uniform(&minus;1,1)
+
+Regular (W=0): &Delta;V &isin; [&minus;0.05B, +0.03B]
+Wide    (W=1): &Delta;V &isin; [&minus;0.15B, +0.09B]
+
+&Delta;V<sub>&infin;</sub> &gt; 0  &hArr;  u &gt; 0.25
+P(net positive | M<sub>roll</sub>=1) = (1&minus;0.25)&divide;2 = 37.5%
+P(net negative | M<sub>roll</sub>=1) = 62.5%   (1.67&times; more frequent)</div>
+        <div class="math-label">Per-Birth Odds &amp; the Dilution Trap</div>
+        <div class="math-block">P(positive)          = 0.15 &times; 0.375 = 5.625%
+P(negative)          = 0.15 &times; 0.625 = 9.375%
+P(wide &and; positive)   = 0.15&times;0.05&times;0.375 = 0.28125%
+P(both alleles +, same birth) = (0.05625)&sup2; &asymp; 0.316%
+
+<span class="comment">// pairing an elite rat (V=2.6) with a sub-elite mate (V=2.4):</span>
+&Delta;V<sub>dilution</sub> = (2.4 &minus; 2.6) &divide; 2 = &minus;0.10 phenotype</div>
+        <p class="math-note">Because <code>&Delta;V<sub>&infin;</sub></code> never shrinks to zero, there is no code-level ceiling &mdash; the step size at extreme deviation stays a constant fraction of Baseline forever, exactly as established elsewhere on this page. The ~2.4&ndash;2.6&times; wall is what happens when a &minus;0.10 dilution hit (crossing elite &times; sub-elite) meets a single regular mutation's max <b>+0.015</b> phenotype gain: dilution wins more often than not, but a colony that only ever breeds within its current elite tier sidesteps the dilution term entirely and is not mathematically blocked from climbing further, just slower.</p>
+      </div>
+    </details>
+
     <div class="grid-2">
       <div class="card">
         <div class="card-head">
@@ -1579,6 +1908,23 @@ NetMaxStep (Wide)    = +0.09 &times; Baseline (3&times; Step, 3&times; Pullback)
       <h2 class="section-title"><span class="section-num">12</span> Prion Disease (Why You Never Feed Them Rat Meat)</h2>
       <span class="card-badge crit">Colony Collapse Hazard</span>
     </div>
+
+    <details class="math-details">
+      <summary class="math-toggle">Math</summary>
+      <div class="math-panel">
+        <div class="math-label">Transmission &amp; Permanent Degradation</div>
+        <div class="math-block">P(Infection) = 1.0 &minus; (1.0 &minus; [FoodPrion]) &times; (g<sub>imm</sub> &divide; 100.0)
+
+[FoodPrion]=1 &rArr; P(Infection) &equiv; 1.00     <span class="comment">// bypasses Immunity entirely</span>
+[FoodPrion]=0 &rArr; P(Infection) = 1 &minus; g<sub>imm</sub>&divide;100.0  <span class="comment">// clean raw meat</span>
+
+<span class="comment">// on infection, permanent multiplicative penalty:</span>
+g<sub>k</sub> &larr; g<sub>k</sub> &times; 0.80    &forall;k &isin; {growth, imm, long}
+
+[CarcassPrion] = [RatInfected]   <span class="comment">// flag propagates into every butchered cut</span></div>
+        <p class="math-note">The penalty compounds with future <code>&#119872;(V,B)</code> mutation rolls off a permanently-lowered baseline &mdash; there's no way to breed it back out except starting from an uninfected line.</p>
+      </div>
+    </details>
 
     <div class="card">
       <div class="card-head">
