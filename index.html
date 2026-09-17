@@ -276,18 +276,17 @@
 
     @media (max-width: 980px) {
       .pipeline-flow {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.35rem;
-      }
-      .pipe-node {
-        flex-direction: row;
-        justify-content: space-between;
-        padding: 0.6rem 0.85rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.5rem;
       }
       .pipe-arrow {
-        transform: rotate(90deg);
-        padding: 0.15rem 0;
+        display: none;
+      }
+      .pipe-step-num,
+      .pipe-name,
+      .pipe-consequence {
+        white-space: normal;
       }
     }
 
@@ -976,8 +975,8 @@
             <td><strong>Max Health</strong></td>
             <td>100.0</td>
             <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
-            <td><strong style="color: var(--accent-emerald);">Unbounded</strong></td>
-            <td><span class="tag-conf">Reported 68 &ndash; 190+</span></td>
+            <td><strong style="color: var(--accent-emerald);">?</strong></td>
+            <td><span class="tag-conf">68 / 190+</span></td>
             <td>A real 7th mutable gene, not a fixed constant &mdash; see the correction below. (The 500 cap you see is for hunger).</td>
           </tr>
         </tbody>
@@ -1425,8 +1424,17 @@ P(Recovery) = g<sub>imm</sub> &divide; 100.0
         <div class="callout takeaway">
           <strong>Key Takeaway:</strong> Rats die the instant Health hits 0 &mdash; that check is explicit and unconditional in every night's DayEnd pass.
         </div>
+      </div>
+
+      <!-- Card 3: Max Health Correction -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Correction: Max Health Isn't Fixed</span>
+          <span class="card-badge crit">Guide Correction</span>
+        </div>
         <div class="callout alert">
-          <strong>Correction &mdash; Max Health mutates:</strong> We originally listed Max Health as a fixed 100.0 constant. Re-checking <code>AnimalSpecies.cctor</code> directly shows it's registered in the exact same gene-definition list as Growth Rate, Hunger Rate, Fertility, Litter Size, and Immunity, with a baseline of 100.0 &mdash; it goes through the identical allele/inheritance/<code>Mutate()</code> pipeline as every other stat (confirmed via the same code path used by <code>GetCurrentStat</code>/<code>GetExpressedValue</code> in <code>ModifyHealth</code> and <code>GiveBirth</code>). It's a real 7th mutable trait, not a display quirk. Practically it's a low-value one to breed for: it doesn't affect weight gain at all, and the community's own testing found it "the most useless stat" &mdash; the main upside is more nights of buffer against the flat 25%-of-Max-Health disease tick and the low-Immunity bleed above.</div>
+          <strong>Correction &mdash; Max Health mutates:</strong> We originally listed Max Health as a fixed 100.0 constant. Re-checking <code>AnimalSpecies.cctor</code> directly shows it's registered in the exact same gene-definition list as Growth Rate, Hunger Rate, Fertility, Litter Size, and Immunity, with a baseline of 100.0 &mdash; it goes through the identical allele/inheritance/<code>Mutate()</code> pipeline as every other stat (confirmed via the same code path used by <code>GetCurrentStat</code>/<code>GetExpressedValue</code> in <code>ModifyHealth</code> and <code>GiveBirth</code>). It's a real 7th mutable trait, not a display quirk. Practically it's a low-value one to breed for: it doesn't affect weight gain at all, and the community's own testing found it "the most useless stat" &mdash; the main upside is more nights of buffer against the flat 25%-of-Max-Health disease tick and the low-Immunity bleed above.
+        </div>
       </div>
     </div>
   </section>
@@ -2131,28 +2139,6 @@ dP(Sick)/dg<sub>imm</sub> = &minus;0.004   for g<sub>imm</sub> &lt; 50,   then a
 &Delta;W<sub>entry</sub>(11) = &minus;17.0    <span class="comment">// and R(a>=11) = -17 g/night, both independent of Longevity</span>
 FertilityPenalty|<sub>Elder</sub> = &minus;0.15 &times; g<sub>fert</sub>   <span class="comment">// also independent of Longevity</span></div>
           <p class="math-note">Hunger Rate has no entry here because it never appears on the right-hand side of a payout formula &mdash; it only appears in <code>H<sub>drain</sub> = max(0, H &minus; g<sub>hunger</sub>)</code>, which determines how long you stay above the 398/200 thresholds that gate Growth and Fertility. Its value is entirely borrowed from whichever of those two stats it's currently protecting. Max Health has no entry either: it never appears in the Growth, Fertility, or Litter formulas at all &mdash; its only appearance anywhere is as the multiplier base in the Regen/SicknessDamage terms above (Step 05). Reducing infection odds is Immunity's job, not Health's.</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">Reality-Checking a Submitted "Optimal Weight Vector"</span>
-          <span class="card-badge warn">Player-Submitted Framework</span>
-        </div>
-        <p style="font-size: 0.825rem; color: var(--text-secondary);">
-          A reader sent in a formal optimal-control writeup for weighting these six stats &mdash; Breeder's Equation, truncation selection intensity, genetic/phenotypic covariance matrices, a concrete weight vector, and a two-phase Day 1&ndash;35 vs. Day 36&ndash;100 policy. Same rule as everywhere else on this page: nothing gets published until it's checked against what we've actually pulled from the code. Here's what did and didn't survive that check.
-        </p>
-        <div class="callout alert">
-          <strong>Didn't hold up:</strong>
-          <ul style="margin: 0.4rem 0 0 1.1rem; padding: 0; line-height: 1.7;">
-            <li><b>"Managerial culling at Day 11/14"</b> &mdash; no such mechanic exists in our decompile. The only culling we've found is Step 06's overcrowding check, which is occupancy-tier based, not age-based. Day 11 is just Elder-stage entry (growth flips negative, Fertility &minus;15%) &mdash; nobody gets force-killed for it.</li>
-            <li><b>Gestation duration "g = 3 days"</b> &mdash; we've explicitly flagged in Step 09 that the real pregnancy-duration constant was never isolated in our own decompile, and 3.0 is also, separately, the Litter Size baseline stat. The player's spec cites it as derived from that baseline, which is a coincidence, not a real citation. That said, community testing (independent of that spec) does consistently land on 3 days as the actual gestation length &mdash; so the number itself is probably right, just not for the reason given.</li>
-            <li><b>The piecewise immunity-damage formula</b> &mdash; the regen half matches our verified formula exactly, but gating &minus;25 HP sickness damage on "Immunity &lt; 50" is wrong. That damage is gated by the actual stochastic <code>IsSick</code> flag, not a static Immunity threshold. A never-sick Immunity-20 rat takes zero sickness damage; a sick Immunity-90 rat still eats the full &minus;25 that night.</li>
-            <li><b>The population-genetics apparatus itself</b> (Breeder's Equation, truncation selection intensity, G/P/R covariance matrices, heritability h&sup2;) &mdash; doesn't correspond to anything we've decompiled. The real mechanism (Section 10/11) is a per-allele stochastic operator that mutates each of the seven stats <em>independently</em> toward a fixed species baseline (yes, seven &mdash; Max Health turns out to be a real mutable gene too, see the Step 05 correction). There's no cross-trait covariance and no linear selection-response system to plug a covariance matrix into.</li>
-          </ul>
-        </div>
-        <div class="callout takeaway">
-          <strong>What's salvageable:</strong> the six named traits and their directions (Hunger inverted, since lower is better) exactly match our own Master Stat Reference table, and the core instinct &mdash; that stats carry unequal, often-capped value &mdash; is correct. It's the specific numeric weight vector and the day-by-day mechanics underneath it that we can't verify, not the general idea of weighting stats unevenly.
         </div>
       </div>
     </div>
