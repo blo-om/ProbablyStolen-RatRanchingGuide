@@ -972,13 +972,13 @@
             <td><span class="tag-conf">1.66 / 7.11</span></td>
             <td>Expressed only by females. Males quietly carry the gene, which can secretly dilute your bloodline.</td>
           </tr>
-          <tr class="row-static">
+          <tr>
             <td><strong>Max Health</strong></td>
             <td>100.0</td>
-            <td><code style="color: var(--text-secondary);">[100.0, 100.0]</code></td>
-            <td><strong>100.0 (Static)</strong></td>
-            <td><span class="tag-static">N/A</span></td>
-            <td>Fixed game constant for all rats. Never mutates. (The 500 cap you see is for hunger).</td>
+            <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
+            <td><strong style="color: var(--accent-emerald);">Unbounded</strong></td>
+            <td><span class="tag-conf">Reported 68 &ndash; 190+</span></td>
+            <td>A real 7th mutable gene, not a fixed constant &mdash; see the correction below. (The 500 cap you see is for hunger).</td>
           </tr>
         </tbody>
       </table>
@@ -1152,6 +1152,9 @@ Starvation(t) = [H&prime; = 0]</div>
           <strong>Breeding Goal:</strong> Breeding Hunger Rate down allows rats to stay above the 398 growth threshold for days on a single feeding.
         </div>
         <p style="font-size: 0.75rem; color: var(--text-tertiary);"><code>HandlePregnancyProgress</code> confirms a real miscarriage mechanic: every night while pregnant, if a specific status flag is active, there's a flat <b>75% chance to lose the pregnancy</b> instead of progressing toward birth (otherwise progress just ticks up by 1, and birth fires once it reaches the species' pregnancy duration).</p>
+        <div class="callout alert">
+          <strong>Community-reported, not yet in our decompile:</strong> hitting 0 hunger doesn't kill outright. Instead of gaining weight that night, a starving rat reportedly <em>loses</em> 25% of the weight it would otherwise have gained (using the un-penalized expected gain, before the hunger-growth penalty above). Death only fires if a rat <em>ends a full day</em> still starving with no food available to eat &mdash; and a rat that dies this way doesn't gain or lose weight that night. We haven't isolated this exact branch in our own decompile, so treat the numbers as reported rather than confirmed.
+        </div>
       </div>
     </div>
   </section>
@@ -1314,8 +1317,11 @@ g<sub>imm</sub> &ge; 50.0 &rArr;  P(Sick) &equiv; 0.000
           </div>
           <div class="kv-item">
             <span class="kv-key">Nightly Health Healing</span>
-            <span class="kv-val">Caps at 50 (+30 HP each night)</span>
+            <span class="kv-val">Caps at 50 (+30% of Max Health/night)</span>
           </div>
+        </div>
+        <div class="callout alert">
+          <strong>Community-reported, not yet in our decompile:</strong> sick rats reportedly raise the disease chance for healthy cage-mates in the same inventory (independent of the waste/overcrowding rolls in Steps 03 &amp; 06), and rats with strong immunity (&ge;50) reportedly speed up sick cage-mates' recovery too, not just their own. Both effects show up consistently in community testing, but we haven't located the transmission formula ourselves.
         </div>
       </div>
     </div>
@@ -1365,10 +1371,10 @@ Health = Health + Regen + SicknessDamage</div>
           </div>
         </div>
         <div class="callout alert">
-          <strong>Low Immunity Bleed:</strong> Regen has no floor of its own. Below 25 Immunity, healthy rats bleed health every night. At 0 Immunity, a rat loses 30 HP nightly and dies in 4 days with no disease involved.
+          <strong>Low Immunity Bleed:</strong> Regen has no floor of its own. Below 25 Immunity, healthy rats bleed health every night. At 0 Immunity, a rat loses 30% of its Max Health nightly &mdash; a baseline 100-HP rat dies in 4 days with no disease involved, but Max Health is itself a bred stat (see the correction below), so a higher-HP rat buys itself more nights before that bleed kills it.
         </div>
         <div class="callout takeaway">
-          <strong>Damage Lands First:</strong> Sickness damage hits before the rat gets a chance to shake it off. A recovering rat still takes -25 HP that night &mdash; the cure only takes effect tomorrow.
+          <strong>Damage Lands First:</strong> Sickness damage hits before the rat gets a chance to shake it off. A recovering rat still takes -25% of Max Health that night &mdash; the cure only takes effect tomorrow.
         </div>
         <div class="math-panel" hidden>
           <div class="math-label">Sub-Step A &mdash; Regeneration (Unconditional)</div>
@@ -1389,7 +1395,7 @@ P(Recovery) = g<sub>imm</sub> &divide; 100.0
 <span class="comment">// if sigma = 0: HP(b) = HP(a) and sigma' stays 0</span></div>
           <div class="math-label">Sub-Step C &mdash; Death Check</div>
           <div class="math-block">&alpha;&prime; = &alpha; &times; [HP<sup>(b)</sup> &gt; 0]</div>
-          <p class="math-note">Regen has no floor of its own &mdash; only the death check stops the slide, and only at exactly 0. A cure rolled tonight still lets tonight's &minus;25 HP land; it only stops <em>tomorrow's</em> damage.</p>
+          <p class="math-note">Regen has no floor of its own &mdash; only the death check stops the slide, and only at exactly 0. A cure rolled tonight still lets tonight's &minus;25% Max Health land; it only stops <em>tomorrow's</em> damage.</p>
         </div>
       </div>
 
@@ -1412,13 +1418,15 @@ P(Recovery) = g<sub>imm</sub> &divide; 100.0
             <span class="kv-val">Explicitly checked in DayEnd</span>
           </div>
           <div class="kv-item">
-            <span class="kv-key">Species Max Health</span>
-            <span class="kv-val">100.0 (AnimalSpecies.cctor)</span>
+            <span class="kv-key">Max Health Baseline</span>
+            <span class="kv-val">100.0 (AnimalSpecies.cctor gene list)</span>
           </div>
         </div>
         <div class="callout takeaway">
           <strong>Key Takeaway:</strong> Rats die the instant Health hits 0 &mdash; that check is explicit and unconditional in every night's DayEnd pass.
         </div>
+        <div class="callout alert">
+          <strong>Correction &mdash; Max Health mutates:</strong> We originally listed Max Health as a fixed 100.0 constant. Re-checking <code>AnimalSpecies.cctor</code> directly shows it's registered in the exact same gene-definition list as Growth Rate, Hunger Rate, Fertility, Litter Size, and Immunity, with a baseline of 100.0 &mdash; it goes through the identical allele/inheritance/<code>Mutate()</code> pipeline as every other stat (confirmed via the same code path used by <code>GetCurrentStat</code>/<code>GetExpressedValue</code> in <code>ModifyHealth</code> and <code>GiveBirth</code>). It's a real 7th mutable trait, not a display quirk. Practically it's a low-value one to breed for: it doesn't affect weight gain at all, and the community's own testing found it "the most useless stat" &mdash; the main upside is more nights of buffer against the flat 25%-of-Max-Health disease tick and the low-Immunity bleed above.</div>
       </div>
     </div>
   </section>
@@ -1524,6 +1532,9 @@ EffectiveFertility = max(0, StatFertility &times; (1 - HungerPenalty
             <span class="kv-val">-15% Fertility</span>
           </div>
         </div>
+        <div class="callout alert">
+          <strong>Community-reported, not yet in our decompile:</strong> Infant (Day 0) and Juvenile (Day 1&ndash;2) rats reportedly cannot mate at all &mdash; fertility is fully disabled, not just penalized, until Adolescence (Day 3+). We haven't isolated the exact gate for this ourselves, so treat it as a minimum-breeding-age rule of thumb rather than a confirmed formula.
+        </div>
         <div class="math-panel" hidden>
           <div class="math-label">Compounding Attenuation &amp; Weak-Link Conception</div>
           <div class="math-block">g<sub>fert</sub> &isin; &#8477;&#8314;   H &isin; [0, 500]
@@ -1548,6 +1559,9 @@ P(Conception | A, B) = min(F<sub>eff</sub>(A), F<sub>eff</sub>(B)) &divide; 100.
         </p>
         <div class="callout takeaway">
           <strong>The Weak Link Rule:</strong> Pregnancy chance uses <code>min(Fertility_A, Fertility_B)</code>, not the average. If your stud male has 90% fertility but is paired with a sick 15% female, your odds are stuck at 15%. Keep both partners healthy!
+        </div>
+        <div class="callout alert">
+          <strong>Common misconception, checked and rejected:</strong> a long-standing community belief holds that pregnancy chance is the <em>average</em> of both partners' fertility. We re-checked this directly against <code>TryMate</code>: it explicitly compares both rats' effective fertility and keeps whichever is lower (<code>if (fertB &le; fertA) fertA = fertB;</code>) before rolling against that value. It's min, not average &mdash; the formula above is what the code actually does.
         </div>
       </div>
     </div>
@@ -1729,7 +1743,7 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
 N<sub>pups</sub> = max(1, &lfloor;g<sub>litter</sub>&rfloor; + Bernoulli(frac(g<sub>litter</sub>)) + &Delta;<sub>var</sub>)
 &Delta;<sub>var</sub> &sim; Uniform{&minus;1, 0, +1}     <span class="comment">// flat species constant, variance=1 for rats</span>
 frac(x) = x &minus; &lfloor;x&rfloor;</div>
-          <p class="math-note"><b>Hedge, deliberately:</b> we've confirmed the 75%/night miscarriage roll itself in <code>HandlePregnancyProgress</code>, and that the gating flag also exempts a rat from a low-hunger growth penalty elsewhere in the code &mdash; strongly suggesting starvation. But we can't certify the trigger is <em>exactly</em> Hunger=0, or state the exact pregnancy-duration constant, since neither was fully isolated in the decompile. Variance is confirmed to be a flat, non-genetic per-species tag (not run through <code>Mutate()</code>); we're less certain it's specifically a discrete {&minus;1,0,+1} draw versus some other bounded distribution.</p>
+          <p class="math-note"><b>Update:</b> we've confirmed the 75%/night miscarriage roll itself in <code>HandlePregnancyProgress</code>, and that the gating flag also exempts a rat from a low-hunger growth penalty elsewhere in the code &mdash; strongly suggesting starvation. Independent community testing has since confirmed both open questions directly: starvation is the trigger, and gestation runs 3 days. We still haven't isolated the exact duration constant ourselves in the decompile, so treat "3 days" as community-confirmed rather than decompile-confirmed. Variance is confirmed to be a flat, non-genetic per-species tag (not run through <code>Mutate()</code>); we're less certain it's specifically a discrete {&minus;1,0,+1} draw versus some other bounded distribution.</p>
         </div>
       </div>
 
@@ -1816,6 +1830,9 @@ Phenotype = (Child.AlleleA + Child.AlleleB) &divide; 2</div>
         <div class="callout takeaway">
           <strong>No Inbreeding Downsides:</strong> Inbreeding carries zero mechanical penalty. The game compares genetics against the species baseline, not lineage.
         </div>
+        <div class="callout alert">
+          <strong>Common misconception, checked and rejected:</strong> some community sources claim only the mother's contributed allele goes through <code>Mutate()</code> and the father's passes down unchanged. <code>ApplyInheritedGenetics</code> shows both the mother-derived allele and the father-derived allele independently calling <code>MutateAllele</code> before being written to the child &mdash; identical treatment, identical 15% roll each. Both parents' contributions can mutate.
+        </div>
         <div class="math-panel" hidden>
           <div class="math-label">Allele Segregation</div>
           <div class="math-block"><span class="comment">// per trait k, independent coin flips J,K in {1,2}, each p=0.5:</span>
@@ -1834,7 +1851,7 @@ Pullback(D,W,V) = 0.25 &times; M(D,W) &times; R(D) &times; sgn(B&minus;V)
 M<sub>roll</sub> &sim; Bernoulli(0.15)    <span class="comment">// does a mutation occur at all</span>
 W      &sim; Bernoulli(0.05)    <span class="comment">// wide roll, checked only if M_roll=1</span>
 u      &sim; Uniform(&minus;1, 1)  <span class="comment">// perturbation direction &amp; magnitude</span></div>
-          <p class="math-note">Twelve independent evaluations of &#119872; per birth &mdash; one per allele, six stats, two alleles each. Resistance is measured purely against the species baseline <code>B</code>, never against parental lineage, which is exactly why inbreeding carries zero mechanical penalty here.</p>
+          <p class="math-note">Fourteen independent evaluations of &#119872; per birth &mdash; one per allele, seven stats, two alleles each. That seventh stat is Max Health, which turns out to run through this exact same allele/mutation pipeline (see the correction in Step 05) rather than being a fixed constant. Resistance is measured purely against the species baseline <code>B</code>, never against parental lineage, which is exactly why inbreeding carries zero mechanical penalty here.</p>
         </div>
       </div>
 
@@ -2016,6 +2033,9 @@ On Infection: Permanent -20% penalty applied simultaneously to Growth, Immunity,
         <div class="callout takeaway">
           <strong>Vicious Cycle:</strong> Butchering an infected rat permanently tags all resulting meat cuts. Feeding that meat back to your pen will ruin your entire colony's gene pool.
         </div>
+        <div class="callout alert">
+          <strong>Community-reported, not yet in our decompile:</strong> a Prion infection reportedly also sets the standard disease tag on top of the permanent stat penalty above &mdash; meaning an infected rat also eats the regular 25%-of-Max-Health nightly damage and can spread ordinary disease to cage-mates, not just the one-time Growth/Immunity/Longevity hit. We haven't traced this specific interaction in our own decompile.
+        </div>
       </div>
       <div class="math-panel" hidden>
         <div class="math-label">Transmission &amp; Permanent Degradation</div>
@@ -2053,7 +2073,7 @@ g<sub>k</sub> &larr; g<sub>k</sub> &times; 0.80    &forall;k &isin; {growth, imm
           </div>
         </div>
         <p style="font-size: 0.825rem; color: var(--text-secondary);">
-          Not every point of stat growth is worth the same. Some stats scale linearly forever, some hit a hard wall, and one only protects value instead of adding it. Here's what each of the six mutable traits is actually doing, pulled straight from the formulas above &mdash; not a guess.
+          Not every point of stat growth is worth the same. Some stats scale linearly forever, some hit a hard wall, and one only protects value instead of adding it. Here's what each of the seven mutable traits is actually doing, pulled straight from the formulas above &mdash; not a guess.
         </p>
         <div class="kv-list">
           <div class="kv-item">
@@ -2080,9 +2100,13 @@ g<sub>k</sub> &larr; g<sub>k</sub> &times; 0.80    &forall;k &isin; {growth, imm
             <span class="kv-key">Hunger Rate</span>
             <span class="kv-val">Adds no value directly &mdash; protects Growth/Fertility from decaying</span>
           </div>
+          <div class="kv-item">
+            <span class="kv-key">Max Health</span>
+            <span class="kv-val">Doesn't affect weight gain at all &mdash; only buys survival buffer</span>
+          </div>
         </div>
         <div class="callout takeaway">
-          <strong>Bottom line:</strong> Litter Size and Growth Rate are the two that keep paying off no matter how far you push them &mdash; there's no cap in the formula. Immunity and Fertility are both "hit the number and stop" investments (50 and 100 respectively); anything spent past that is wasted breeding effort. Longevity is a niche pick that only pays off if you deliberately keep breeders alive past Day 10&ndash;14 for extra litters. Hunger Rate never shows up in a payout formula itself &mdash; it just keeps your rats above the 398/200-calorie thresholds longer per feeding, which is what actually protects your Growth and Fertility numbers.
+          <strong>Bottom line:</strong> Litter Size and Growth Rate are the two that keep paying off no matter how far you push them &mdash; there's no cap in the formula. Immunity and Fertility are both "hit the number and stop" investments (50 and 100 respectively); anything spent past that is wasted breeding effort. Longevity is a niche pick that only pays off if you deliberately keep breeders alive past Day 10&ndash;14 for extra litters. Hunger Rate never shows up in a payout formula itself &mdash; it just keeps your rats above the 398/200-calorie thresholds longer per feeding, which is what actually protects your Growth and Fertility numbers. Max Health is the weakest pick of all seven: it never touches weight, fertility, or growth &mdash; the only thing it buys is more nights of buffer against the flat 25%-of-Max-Health disease tick and the sub-25-Immunity bleed.
         </div>
         <div class="math-panel" hidden>
           <div class="math-label">Growth Rate &amp; Litter Size &mdash; No Ceiling In The Formula</div>
@@ -2106,7 +2130,7 @@ dP(Sick)/dg<sub>imm</sub> = &minus;0.004   for g<sub>imm</sub> &lt; 50,   then a
 <span class="comment">// Elder-stage entry (age >= 11) still fires on schedule regardless of g_long:</span>
 &Delta;W<sub>entry</sub>(11) = &minus;17.0    <span class="comment">// and R(a>=11) = -17 g/night, both independent of Longevity</span>
 FertilityPenalty|<sub>Elder</sub> = &minus;0.15 &times; g<sub>fert</sub>   <span class="comment">// also independent of Longevity</span></div>
-          <p class="math-note">Hunger Rate has no entry here because it never appears on the right-hand side of a payout formula &mdash; it only appears in <code>H<sub>drain</sub> = max(0, H &minus; g<sub>hunger</sub>)</code>, which determines how long you stay above the 398/200 thresholds that gate Growth and Fertility. Its value is entirely borrowed from whichever of those two stats it's currently protecting.</p>
+          <p class="math-note">Hunger Rate has no entry here because it never appears on the right-hand side of a payout formula &mdash; it only appears in <code>H<sub>drain</sub> = max(0, H &minus; g<sub>hunger</sub>)</code>, which determines how long you stay above the 398/200 thresholds that gate Growth and Fertility. Its value is entirely borrowed from whichever of those two stats it's currently protecting. Max Health has no entry either: it never appears in the Growth, Fertility, or Litter formulas at all &mdash; its only appearance anywhere is as the multiplier base in the Regen/SicknessDamage terms above (Step 05). Reducing infection odds is Immunity's job, not Health's.</p>
         </div>
       </div>
 
@@ -2122,9 +2146,9 @@ FertilityPenalty|<sub>Elder</sub> = &minus;0.15 &times; g<sub>fert</sub>   <span
           <strong>Didn't hold up:</strong>
           <ul style="margin: 0.4rem 0 0 1.1rem; padding: 0; line-height: 1.7;">
             <li><b>"Managerial culling at Day 11/14"</b> &mdash; no such mechanic exists in our decompile. The only culling we've found is Step 06's overcrowding check, which is occupancy-tier based, not age-based. Day 11 is just Elder-stage entry (growth flips negative, Fertility &minus;15%) &mdash; nobody gets force-killed for it.</li>
-            <li><b>Gestation duration "g = 3 days"</b> &mdash; we've explicitly flagged in Step 09 that the real pregnancy-duration constant was never isolated in the decompile. 3.0 is actually the Litter Size baseline stat, not a day count &mdash; this looks like the two got swapped.</li>
+            <li><b>Gestation duration "g = 3 days"</b> &mdash; we've explicitly flagged in Step 09 that the real pregnancy-duration constant was never isolated in our own decompile, and 3.0 is also, separately, the Litter Size baseline stat. The player's spec cites it as derived from that baseline, which is a coincidence, not a real citation. That said, community testing (independent of that spec) does consistently land on 3 days as the actual gestation length &mdash; so the number itself is probably right, just not for the reason given.</li>
             <li><b>The piecewise immunity-damage formula</b> &mdash; the regen half matches our verified formula exactly, but gating &minus;25 HP sickness damage on "Immunity &lt; 50" is wrong. That damage is gated by the actual stochastic <code>IsSick</code> flag, not a static Immunity threshold. A never-sick Immunity-20 rat takes zero sickness damage; a sick Immunity-90 rat still eats the full &minus;25 that night.</li>
-            <li><b>The population-genetics apparatus itself</b> (Breeder's Equation, truncation selection intensity, G/P/R covariance matrices, heritability h&sup2;) &mdash; doesn't correspond to anything we've decompiled. The real mechanism (Section 10/11) is a per-allele stochastic operator that mutates each of the six stats <em>independently</em> toward a fixed species baseline. There's no cross-trait covariance and no linear selection-response system to plug a covariance matrix into.</li>
+            <li><b>The population-genetics apparatus itself</b> (Breeder's Equation, truncation selection intensity, G/P/R covariance matrices, heritability h&sup2;) &mdash; doesn't correspond to anything we've decompiled. The real mechanism (Section 10/11) is a per-allele stochastic operator that mutates each of the seven stats <em>independently</em> toward a fixed species baseline (yes, seven &mdash; Max Health turns out to be a real mutable gene too, see the Step 05 correction). There's no cross-trait covariance and no linear selection-response system to plug a covariance matrix into.</li>
           </ul>
         </div>
         <div class="callout takeaway">
