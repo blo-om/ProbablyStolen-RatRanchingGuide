@@ -977,7 +977,7 @@
             <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
             <td><strong style="color: var(--accent-emerald);">?</strong></td>
             <td><span class="tag-conf">68 / 190+</span></td>
-            <td>A real 7th mutable gene, not a fixed constant &mdash; see the correction below. (The 500 cap you see is for hunger).</td>
+            <td>A real 7th mutable gene, registered in the same <code>AnimalSpecies.cctor</code> gene list as the others &mdash; not a fixed constant. (The 500 cap you see is for hunger).</td>
           </tr>
         </tbody>
       </table>
@@ -1370,7 +1370,7 @@ Health = Health + Regen + SicknessDamage</div>
           </div>
         </div>
         <div class="callout alert">
-          <strong>Low Immunity Bleed:</strong> Regen has no floor of its own. Below 25 Immunity, healthy rats bleed health every night. At 0 Immunity, a rat loses 30% of its Max Health nightly &mdash; a baseline 100-HP rat dies in 4 days with no disease involved, but Max Health is itself a bred stat (see the correction below), so a higher-HP rat buys itself more nights before that bleed kills it.
+          <strong>Low Immunity Bleed:</strong> Regen has no floor of its own. Below 25 Immunity, healthy rats bleed health every night. At 0 Immunity, a rat loses 30% of its Max Health nightly &mdash; a baseline 100-HP rat dies in 4 days with no disease involved, but Max Health is itself a bred stat (it's a real 7th mutable gene, not a fixed 100.0 constant), so a higher-HP rat buys itself more nights before that bleed kills it.
         </div>
         <div class="callout takeaway">
           <strong>Damage Lands First:</strong> Sickness damage hits before the rat gets a chance to shake it off. A recovering rat still takes -25% of Max Health that night &mdash; the cure only takes effect tomorrow.
@@ -1423,17 +1423,6 @@ P(Recovery) = g<sub>imm</sub> &divide; 100.0
         </div>
         <div class="callout takeaway">
           <strong>Key Takeaway:</strong> Rats die the instant Health hits 0 &mdash; that check is explicit and unconditional in every night's DayEnd pass.
-        </div>
-      </div>
-
-      <!-- Card 3: Max Health Correction -->
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">Correction: Max Health Isn't Fixed</span>
-          <span class="card-badge crit">Guide Correction</span>
-        </div>
-        <div class="callout alert">
-          <strong>Correction &mdash; Max Health mutates:</strong> We originally listed Max Health as a fixed 100.0 constant. Re-checking <code>AnimalSpecies.cctor</code> directly shows it's registered in the exact same gene-definition list as Growth Rate, Hunger Rate, Fertility, Litter Size, and Immunity, with a baseline of 100.0 &mdash; it goes through the identical allele/inheritance/<code>Mutate()</code> pipeline as every other stat (confirmed via the same code path used by <code>GetCurrentStat</code>/<code>GetExpressedValue</code> in <code>ModifyHealth</code> and <code>GiveBirth</code>). It's a real 7th mutable trait, not a display quirk. Practically it's a low-value one to breed for: it doesn't affect weight gain at all, and the community's own testing found it "the most useless stat" &mdash; the main upside is more nights of buffer against the flat 25%-of-Max-Health disease tick and the low-Immunity bleed above.
         </div>
       </div>
     </div>
@@ -1633,7 +1622,10 @@ R(a) = +75.0 g/night,  0 &le; a &le; 4   <span class="comment">// Infant/Juvenil
                                        <span class="comment">// community-sourced curve, not decompiled</span>
 
 &Delta;W = R(a) &times; g<sub>growth</sub> &times; (1 &minus; &Pi;<sub>growth</sub>(H&prime;))    if H&prime; &gt; 0
-W&prime; = max(0.01, W + &Delta;W + &Delta;W<sub>entry</sub>(a))</div>
+     = &minus;0.25 &times; R(a) &times; g<sub>growth</sub>                     if H&prime; = 0 (starvation)
+                                       <span class="comment">// starvation loses 25% of the UN-penalized expected gain, not the hunger-penalized one; community-sourced, not decompiled</span>
+W&prime; = max(0.01, W + &Delta;W + &Delta;W<sub>entry</sub>(a))
+<span class="comment">// a rat that dies to starvation this same night gets neither branch - no weight change at all</span></div>
           <div class="math-label">Feces Tier &amp; Butchery Partition</div>
           <div class="math-block">TriggerPoop = [&Delta;W &gt; 29.0]
 Tier<sub>feces</sub> = 2&times;[W&prime;&ge;1000] + 1&times;[600&le;W&prime;&lt;1000] + 0&times;[W&prime;&lt;600]
@@ -1859,7 +1851,7 @@ Pullback(D,W,V) = 0.25 &times; M(D,W) &times; R(D) &times; sgn(B&minus;V)
 M<sub>roll</sub> &sim; Bernoulli(0.15)    <span class="comment">// does a mutation occur at all</span>
 W      &sim; Bernoulli(0.05)    <span class="comment">// wide roll, checked only if M_roll=1</span>
 u      &sim; Uniform(&minus;1, 1)  <span class="comment">// perturbation direction &amp; magnitude</span></div>
-          <p class="math-note">Fourteen independent evaluations of &#119872; per birth &mdash; one per allele, seven stats, two alleles each. That seventh stat is Max Health, which turns out to run through this exact same allele/mutation pipeline (see the correction in Step 05) rather than being a fixed constant. Resistance is measured purely against the species baseline <code>B</code>, never against parental lineage, which is exactly why inbreeding carries zero mechanical penalty here.</p>
+          <p class="math-note">Fourteen independent evaluations of &#119872; per birth &mdash; one per allele, seven stats, two alleles each. That seventh stat is Max Health: <code>AnimalSpecies.cctor</code> registers it in the identical gene-definition list as the other six, with baseline 100.0, so it runs through this exact same allele/mutation pipeline rather than being a fixed constant. Resistance is measured purely against the species baseline <code>B</code>, never against parental lineage, which is exactly why inbreeding carries zero mechanical penalty here.</p>
         </div>
       </div>
 
@@ -2040,9 +2032,6 @@ On Infection: Permanent -20% penalty applied simultaneously to Growth, Immunity,
         </div>
         <div class="callout takeaway">
           <strong>Vicious Cycle:</strong> Butchering an infected rat permanently tags all resulting meat cuts. Feeding that meat back to your pen will ruin your entire colony's gene pool.
-        </div>
-        <div class="callout alert">
-          <strong>Community-reported, not yet in our decompile:</strong> a Prion infection reportedly also sets the standard disease tag on top of the permanent stat penalty above &mdash; meaning an infected rat also eats the regular 25%-of-Max-Health nightly damage and can spread ordinary disease to cage-mates, not just the one-time Growth/Immunity/Longevity hit. We haven't traced this specific interaction in our own decompile.
         </div>
       </div>
       <div class="math-panel" hidden>
