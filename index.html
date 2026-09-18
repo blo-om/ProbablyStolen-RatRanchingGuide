@@ -1,8 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rat Ranching: Under The Hood</title>
   <style>
     :root {
@@ -754,8 +749,6 @@
       font-family: var(--font-mono);
     }
   </style>
-</head>
-<body>
 
 <a href="#" class="back-to-top" id="backToTop" aria-label="Back to top">
   <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -945,7 +938,7 @@
             <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
             <td><strong style="color: var(--accent-emerald);">~2.2 &ndash; 2.5</strong></td>
             <td><span class="tag-conf">0.53 / 1.63</span></td>
-            <td>Pushes back old-age death rolls, <em>and</em> also delays Elder-stage weight loss and its fertility penalty &mdash; both scale with Longevity too (see Step 08).</td>
+            <td>Pushes back old-age death rolls, but elder weight loss always starts on Day 11 regardless.</td>
           </tr>
           <tr>
             <td><strong>Immunity</strong></td>
@@ -1037,7 +1030,7 @@ P(Mortality | a) = 0.75 &times; &chi;<sub>senescent</sub>
 
 lim<sub>k&rarr;&infin;</sub> P(survive) = 0
 P(k=1) = 25.00%     P(k=2) = 6.25%     P(k=4) &asymp; 0.39%</div>
-          <p class="math-note">Every night past <code>A<sub>crit</sub></code> is an independent Bernoulli trial &mdash; survival probability decays geometrically, never resetting and never reaching a guaranteed-death floor.</p>
+          <p class="math-note">Every night past <code>A<sub>crit</sub></code> is an independent Bernoulli trial &mdash; survival probability decays geometrically, never resetting and never reaching a guaranteed-death floor. The "14" itself is confirmed by decompile to live as a 6th entry in the same per-species array that holds the 5 growth-stage boundaries (<code>growthStages[5]</code>), not a separate hardcoded literal &mdash; the master nightly dispatcher reads that exact array slot, multiplies it by Longevity, and compares against age before rolling the flat 75% (<code>RNG.Roll(75)</code>, also confirmed bit-exact).</p>
         </div>
       </div>
 
@@ -1106,7 +1099,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
           </div>
           <div class="kv-item">
             <span class="kv-key">Starting Newborn Stomach</span>
-            <span class="kv-val">500 (Species Default)</span>
+            <span class="kv-val">125 (25% of Max Hunger)</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Starvation Trigger</span>
@@ -1116,7 +1109,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
         <div class="callout takeaway">
           <strong>Picky Eaters:</strong> Rats won't touch a food item if their current hunger already covers 75% of <em>that item's</em> value (<code>FoodMaxValue &times; 0.75 &le; HungerToday</code>). This is relative to each food's own value, not a single fixed hunger number &mdash; a small snack still gets eaten well past the point a big meal would be rejected.
         </div>
-        <p style="font-size: 0.75rem; color: var(--text-tertiary);">Neither <code>InitAnimalItem</code> nor <code>GiveBirth</code> sets a rat's Hunger tag explicitly at spawn, so newborns simply inherit <code>AnimalSpecies</code>'s base-stats default of 500 &mdash; the full reservoir, not a smaller starting stomach.</p>
+        <p style="font-size: 0.75rem; color: var(--text-tertiary);"><b>Correction:</b> we previously claimed newborns inherit the full 500-point reservoir untouched. Decompiling <code>GiveBirth</code>'s hunger-init callback directly disproves that &mdash; it explicitly sets <code>Hunger = MaxHunger &times; 0.25</code> for every newborn (both 500.0 and 0.25 confirmed bit-exact from memory). A newborn actually starts at <b>125</b>, a quarter of the full reservoir, not the full 500.</p>
         <div class="math-panel" hidden>
           <div class="math-label">Basal Depletion &amp; Ingestion Gate</div>
           <div class="math-block">H &isin; [0, 500]  (Hunger reservoir)      g<sub>hunger</sub> &isin; &#8477;&#8314;
@@ -1135,12 +1128,12 @@ Starvation(t) = [H&prime; = 0]</div>
       <div class="card">
         <div class="card-head">
           <span class="card-title">Penalties for Underfed Rats</span>
-          <span class="card-badge warn">Thresholds: 398 &amp; 200</span>
+          <span class="card-badge warn">Thresholds: 400 &amp; 200</span>
         </div>
         <div class="kv-list">
           <div class="kv-item">
             <span class="kv-key">Stunted Growth (Step 08)</span>
-            <span class="kv-val">&lt; 398 Calories (-1% to -50% weight gain)</span>
+            <span class="kv-val">&lt; 400 Calories (-1% to -50% weight gain)</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Lowered Fertility (Step 07)</span>
@@ -1148,7 +1141,7 @@ Starvation(t) = [H&prime; = 0]</div>
           </div>
         </div>
         <div class="callout takeaway">
-          <strong>Breeding Goal:</strong> Breeding Hunger Rate down allows rats to stay above the 398 growth threshold for days on a single feeding.
+          <strong>Breeding Goal:</strong> Breeding Hunger Rate down allows rats to stay above the 400 growth threshold for days on a single feeding.
         </div>
         <p style="font-size: 0.75rem; color: var(--text-tertiary);"><code>HandlePregnancyProgress</code> confirms a real miscarriage mechanic: every night while pregnant, if the rat is starving, there's a flat <b>75% chance to lose the pregnancy</b> instead of progressing toward birth (otherwise progress just ticks up by 1, and birth fires once it reaches the species' pregnancy duration). The gating flag is the same starving tag <code>HandleStarvation</code> sets, confirmed by cross-referencing both functions directly &mdash; no longer just a strong suspicion.</p>
         <div class="callout takeaway">
@@ -1525,36 +1518,40 @@ EffectiveFertility = max(0, StatFertility &times; (1 - HungerPenalty
             <span class="kv-val">-20% per Tier</span>
           </div>
           <div class="kv-item">
-            <span class="kv-key">Elder Stage</span>
-            <span class="kv-val">-15% Fertility (threshold scales with Longevity, see Step 08)</span>
+            <span class="kv-key">Elder Stage (Day 11+)</span>
+            <span class="kv-val">-15% Fertility</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Infant &amp; Juvenile (Day 0&ndash;2)</span>
             <span class="kv-val">Cannot mate at all &mdash; not a penalty, a hard block</span>
           </div>
+          <div class="kv-item">
+            <span class="kv-key">Neutered</span>
+            <span class="kv-val">Cannot mate at all, permanently &mdash; hard block, not a penalty</span>
+          </div>
         </div>
         <div class="callout takeaway">
           <strong>Confirmed:</strong> <code>CanMate</code> calls <code>IsMature</code> before anything else, which returns <code>growthStages[2] &le; CurrentAge</code> &mdash; index 2 is Adolescence's start day (3). Below that, <code>CanMate</code> returns false immediately and the rat never reaches the fertility formula at all. Fertility eligibility opens exactly at Adolescence, not before.
+        </div>
+        <div class="callout alert">
+          <strong>New mechanic, confirmed by decompile:</strong> the previously-unidentified 4th boolean tag in <code>CanMate</code> is <code>ANIMAL_NEUTERED_TAG</code> &mdash; rats can be neutered to permanently prevent them from ever mating again. This is a real, separate hard gate alongside dead/starving/pregnant, not a disease check as we'd speculated before re-verifying against the correctly-matched decompile.
         </div>
         <div class="math-panel" hidden>
           <div class="math-label">Age Gate &mdash; Checked Before Any of This Runs</div>
           <div class="math-block">a &isin; &#8469;&#8320;  (age, days)      S = growthStages  (species stage-boundary array, [0,1,3,5,11])
 
 IsMature(a) = [S[2] &le; a] = [3 &le; a]     <span class="comment">// index 2 = Adolescence's start day</span>
-CanMate = &not;IsDead &and; &not;IsStarving &and; &not;IsPregnant &and; &not;[4th tag, unresolved] &and; IsMature(a) &and; (attempts &lt; 3)</div>
+CanMate = &not;IsDead &and; &not;IsStarving &and; &not;IsPregnant &and; &not;IsNeutered &and; IsMature(a) &and; (currentMatingCount &lt; maxMatingCount)</div>
           <div class="math-label">Compounding Attenuation &amp; Weak-Link Conception</div>
-          <div class="math-block">g<sub>fert</sub> &isin; &#8477;&#8314;   H &isin; [0, 500]      g<sub>long</sub> &isin; &#8477;&#8314;  (Longevity)
+          <div class="math-block">g<sub>fert</sub> &isin; &#8477;&#8314;   H &isin; [0, 500]
 
 <span class="comment">// hunger penalty only applies below 200, exact and linear:</span>
 &Pi;<sub>hunger</sub>(H) = max(0, (200 &minus; H) &divide; 200) &times; 0.40
 
-<span class="comment">// Elder threshold for THIS formula is longevity-scaled, confirmed in UpdateFertility - NOT a fixed age 11:</span>
-IsElder = [S[4] &times; g<sub>long</sub> &le; a] = [11 &times; g<sub>long</sub> &le; a]
-
-F<sub>eff</sub> = max(0, g<sub>fert</sub> &times; [1 &minus; &Pi;<sub>hunger</sub> &minus; 0.15&times;IsElder &minus; 0.75&times;&sigma; &minus; 0.20&times;Tier])
+F<sub>eff</sub> = max(0, g<sub>fert</sub> &times; [1 &minus; &Pi;<sub>hunger</sub> &minus; 0.15&times;[Elder] &minus; 0.75&times;&sigma; &minus; 0.20&times;Tier])
 
 P(Conception | A, B) = min(F<sub>eff</sub>(A), F<sub>eff</sub>(B)) &divide; 100.0</div>
-          <p class="math-note">Four independent linear deductions stack multiplicatively against the same base, then conception probability is gated by whichever partner's <b>effective</b> fertility is lower &mdash; not the average of the two. <code>CanMate</code> checks four boolean tags before <code>IsMature</code>; we've identified three of them (dead, starving, pregnant) by cross-referencing their use in other functions, but the fourth remains unidentified in what we've decompiled &mdash; possibly a disease gate, but not confirmed.</p>
+          <p class="math-note">Four independent linear deductions stack multiplicatively against the same base, then conception probability is gated by whichever partner's <b>effective</b> fertility is lower &mdash; not the average of the two, confirmed by the literal decompiled line <code>if (fertB &le; fertA) fertA = fertB;</code> in <code>TryMate</code>. <code>CanMate</code> checks four boolean tags before <code>IsMature</code>: dead, starving, pregnant, and (now confirmed by decompile) neutered. The "up to 3 attempts" cap is itself read from a per-species tag (<code>ANIMAL_MAX_MATING_COUNT_TAG</code>, default 3) rather than a hardcoded literal &mdash; it isn't one of the seven mutable/inheritable genes, so it doesn't drift through breeding, but it's stored the same way the other species baselines are.</p>
         </div>
       </div>
 
@@ -1597,7 +1594,7 @@ P(Conception | A, B) = min(F<sub>eff</sub>(A), F<sub>eff</sub>(B)) &divide; 100.
           </div>
         </div>
         <div class="formula">WeightGain = StageRate &times; GrowthRate &times; (1 - HungerPenalty)
-Hunger &lt; 398: Penalty = max(0, 0.50 - 0.49 &times; H &divide; 398)</div>
+Hunger &lt; 400: Penalty = max(0, 0.50 - 0.49 &times; H &divide; 400)</div>
         <div class="table-box">
           <table>
             <thead>
@@ -1613,32 +1610,29 @@ Hunger &lt; 398: Penalty = max(0, 0.50 - 0.49 &times; H &divide; 398)</div>
               <tr><td>Juvenile</td><td>1 &ndash; 2</td><td>+75g / night</td><td>None</td></tr>
               <tr><td>Adolescent</td><td>3 &ndash; 4</td><td>+75g / night</td><td>None</td></tr>
               <tr><td>Adult</td><td>5 &ndash; 10</td><td>+17g / night</td><td>None</td></tr>
-              <tr><td>Elder</td><td>11+ (at baseline Longevity)</td><td>-17g / night</td><td>-17g instant penalty on entry</td></tr>
+              <tr><td>Elder</td><td>11+</td><td>-17g / night</td><td>-17g instant penalty on entry</td></tr>
             </tbody>
           </table>
         </div>
         <div class="callout alert">
           <strong>Elder Shrinkage:</strong> Elders lose 17g every night, and that loss scales with Growth Rate. Fast-growing rats shrink fastest in old age. Harvest on Day 10 before shrinkage starts!
         </div>
-        <div class="callout takeaway">
-          <strong>Correction &mdash; Elder threshold scales with Longevity:</strong> we previously said Elder entry (and its weight/fertility effects) fires on Day 11 "regardless of Longevity." Decompiling <code>GetAnimalCurrentWeightChange</code> and <code>UpdateFertility</code> directly shows both read the Longevity gene and gate their Elder-stage branch on <code>growthStages[4] &times; Longevity &le; Age</code>, not a fixed 11. At baseline Longevity (1.0) that's still Day 11, which is why testing at the default value looked fixed &mdash; but a 1.5-Longevity rat's Elder penalties don't kick in until Day 17. Only <code>IsMature</code> (the mating-eligibility gate at Day 3) is a true fixed, unscaled threshold.
-        </div>
         <div class="math-panel" hidden>
           <div class="math-label">Stage-Dependent Growth &amp; Entry Bonuses</div>
-          <div class="math-block">W &isin; &#8477;&#8314;  (body mass, g)   a &isin; &#8469;&#8320;  (age, days)   g<sub>long</sub> &isin; &#8477;&#8314;  (Longevity)
+          <div class="math-block">W &isin; &#8477;&#8314;  (body mass, g)   a &isin; &#8469;&#8320;  (age, days)
 
 R(a) = +75.0 g/night,  0 &le; a &le; 4   <span class="comment">// Infant/Juvenile/Adolescent</span>
-     = +17.0 g/night,  5 &le; a &lt; 11&times;g<sub>long</sub>  <span class="comment">// Adult, EXTENDED by Longevity - confirmed via GetAnimalCurrentWeightChange</span>
-     = &minus;17.0 g/night, a &ge; 11&times;g<sub>long</sub>     <span class="comment">// Elder, delayed by Longevity</span>
+     = +17.0 g/night,  5 &le; a &le; 10  <span class="comment">// Adult</span>
+     = &minus;17.0 g/night, a &ge; 11     <span class="comment">// Elder for stage DISPLAY - fixed at Day 11, confirmed NOT to scale with Longevity. The underlying WEIGHT-CHANGE function is more complex here; see the note below</span>
 
-&Delta;W<sub>entry</sub>(a) = +5.0&times;[a=0] &minus; 17.0&times;[a=11&times;g<sub>long</sub>]   <span class="comment">// one-time, on stage transition</span>
+&Delta;W<sub>entry</sub>(a) = +5.0&times;[a=0] &minus; 17.0&times;[a=11]   <span class="comment">// one-time, on stage transition</span>
 
-&Pi;<sub>growth</sub>(H) &asymp; max(0.01, 0.50 &minus; 0.49&times;(H&divide;398))   for 0 &lt; H &lt; 398
-                                       <span class="comment">// community-sourced curve, not decompiled</span>
+&Pi;<sub>growth</sub>(H) = 0.5 &times; (1 &minus; H&divide;400)   for 0 &le; H &lt; 400, else 0
+                                       <span class="comment">// now decompile-exact: threshold is 400.0 (not 398), and the coefficient is a clean 0.5, not the community's approximated 0.49</span>
 
 &Delta;W = R(a) &times; g<sub>growth</sub> &times; (1 &minus; &Pi;<sub>growth</sub>(H&prime;))    if H&prime; &gt; 0
-     = &minus;0.25 &times; R(a) &times; g<sub>growth</sub>                     if H&prime; = 0 (starvation)
-                                       <span class="comment">// community-reported starvation multiplier - we confirmed HandleStarvation's death condition and that GetAnimalCurrentWeightChange branches separately on the starving tag, but couldn't cleanly recover this exact -0.25 coefficient from Ghidra's decompilation of that function</span>
+     = &minus;0.5 &times; |R(a) &times; g<sub>growth</sub>|                     if H&prime; = 0 (starvation)
+                                       <span class="comment">// now decompile-exact: the code takes the absolute value of the normal rate, then forces it negative and halves it - the coefficient is 0.5, not 0.25, and the sign is always forced negative regardless of what R(a) would naturally be</span>
 W&prime; = max(0.01, W + &Delta;W + &Delta;W<sub>entry</sub>(a))
 <span class="comment">// a rat that dies to starvation this same night gets neither branch - no weight change at all</span></div>
           <div class="math-label">Feces Tier &amp; Butchery Partition</div>
@@ -1650,7 +1644,8 @@ C<sub>Standard</sub>    = &lfloor; W<sub>eff</sub> &divide; 400 &rfloor;
 C<sub>SmallCut</sub>    = &lfloor; (W<sub>eff</sub> mod 400) &divide; 200 &rfloor;
 C<sub>Morsel</sub>      = &lfloor; (W<sub>eff</sub> mod 200) &divide; 100 &rfloor;
 C<sub>SmallMorsel</sub> = &lceil; (W<sub>eff</sub> mod 100) &divide; 50 &rceil;</div>
-          <p class="math-note">The exact hunger-penalty curve is still the community's measured approximation, not a literal decompiled read. But we did successfully decompile <code>GetAnimalCurrentWeightChange</code> and <code>HandleStarvation</code> directly: the stage-boundary array (<code>growthStages</code>, confirmed as [0, 1, 3, 5, 11]) and the Longevity-scaling on the Elder boundary are both decompile-confirmed, as is the starving-vs-not branch split. What we couldn't cleanly recover from Ghidra's output was the exact coefficient inside that starving branch. Everything in the Butchery block, by contrast, is decompiled and exact.</p>
+          <p class="math-note">Re-verified against a freshly-built, MD5-confirmed-matching decompile project (our original Ghidra project had silently drifted onto a different game build), then pushed past the decompiler entirely into raw disassembly once the C output dropped the floating-point arguments to a helper call. That paid off: the 400-calorie threshold, the hunger-penalty coefficient, and the starvation coefficient are now all decompile-exact, and two of them turned out different from what we and the community had assumed &mdash; 0.5, not 0.49, for the hunger curve, and 0.5 (not 0.25) for the starvation multiplier, which the code applies as <em>negative absolute value</em> of the normal rate rather than a fraction of it.</p>
+          <p class="math-note"><b>Open question, not yet resolved:</b> that same raw disassembly shows <code>GetAnimalCurrentWeightChange</code> reading Longevity and using it to pick which stage's rate applies &mdash; but only inside <em>this</em> function, and only when the rat is at the oldest stage index. We previously retracted a claim that Longevity delays the Elder boundary, based on in-game testing across multiple seeds showing the Elder stage <em>label</em> starts on Day 11 regardless of Longevity. That test checked the visible stage/display, which we've now separately confirmed (<code>GetStageIndex</code>, <code>GetAnimalGrowthStageDisplay</code>) is purely age-based with no Longevity term at all &mdash; so the retraction is correct for what it tested. It did not test whether a high-Longevity rat's actual nightly <em>weight change</em> still flips negative exactly on Day 11, which is a distinct question this same disassembly says might have a different answer. We also could not cleanly pin down what the two per-species arrays this function reads (growth-stage boundaries and a second, still-unidentified array) resolve to once Longevity substitutes a different array index &mdash; the arithmetic didn't reproduce the plain +75/+75/+75/+17/&minus;17 g/night figures we'd otherwise confirmed, so something about that interpolation isn't fully understood yet. Until someone runs the actual test (track a high-Longevity rat's weight specifically across Days 10&ndash;15+, not just its displayed stage), treat "Elder weight loss starts on Day 11 regardless of Longevity" as likely but not fully closed. Everything in the Butchery block, by contrast, is decompiled and exact &mdash; including the sick-weight 0.75&times; multiplier and the ceiling-division trick for SmallMorsels, both confirmed bit-exact from memory.</p>
         </div>
       </div>
 
@@ -1739,6 +1734,9 @@ SmallMorsels = ceil((EffectiveWeight mod 100) &divide; 50)</div>
         </div>
         <div class="callout takeaway">
           <strong>Harem Sizing:</strong> <code>CheckMate</code> shuffles the eligible, non-pregnant, opposite-sex roommates and walks that list once, trying a <b>different partner on each of the (up to) 3 attempts</b> &mdash; not 3 rolls against the same rat. With fewer than 3 eligible partners available, the extra attempts just go unused that night. Keeping a few spare females in the pen ensures a male's full nightly budget gets used, since a female becomes ineligible the moment she's pregnant.
+        </div>
+        <div class="callout alert">
+          <strong>New detail, confirmed by decompile:</strong> mating attempts are mutual, not one-sided. Every attempt increments <em>both</em> rats' attempt counters &mdash; the female targeted also spends one of her own nightly attempts just by being on the receiving end, even though she initiated nothing. The counter itself resets to 0 for every rat at the start of each night, right before <code>CheckMate</code> runs, so this is strictly a per-night budget, never cumulative.
         </div>
         <div class="math-panel" hidden>
           <div class="math-label">Attempt Allocation</div>
@@ -2036,12 +2034,16 @@ P(both alleles +, same birth) = (0.05625)<sup>2</sup> &asymp; 0.316%
           </button>
         </div>
       </div>
-      <div class="formula">IsFoodFlagged = [Food already carries Prion flag]
-InfectionChance = 1.0 - (1.0 - IsFoodFlagged) &times; (Immunity &divide; 100)
+      <div class="formula">RequiresCannibalism = [Food's species-of-origin == Eater's own species]
+IsFoodFlagged = [Food already carries Prion flag]
+InfectionChance = RequiresCannibalism &times; (1.0 - (1.0 - IsFoodFlagged) &times; (Immunity &divide; 100))
 
 On Infection: Permanent -20% penalty applied simultaneously to Growth, Immunity, and Longevity.</div>
 
       <div class="grid-2" style="margin-top: 0.5rem;">
+        <div class="callout alert">
+          <strong>It's specifically cannibalism, confirmed by decompile:</strong> <code>CheckCannibalism</code> first checks whether the meat's species-of-origin matches the eater's own species &mdash; feeding a rat any other species' meat never triggers this check at all, regardless of the Prion flag. Only rat-on-rat feeding is at risk, matching the section title.
+        </div>
         <div class="callout alert">
           <strong>Contaminated Feeders:</strong> Meat already carrying the Prion flag infects rats 100% of the time, ignoring immunity completely. Clean raw meat rolls <code>1 - Immunity/100</code>.
         </div>
@@ -2051,16 +2053,18 @@ On Infection: Permanent -20% penalty applied simultaneously to Growth, Immunity,
       </div>
       <div class="math-panel" hidden>
         <div class="math-label">Transmission &amp; Permanent Degradation</div>
-        <div class="math-block">P(Infection) = 1.0 &minus; (1.0 &minus; [FoodPrion]) &times; (g<sub>imm</sub> &divide; 100.0)
+        <div class="math-block">[Cannibalism] = [FoodSpecies == EaterSpecies]   <span class="comment">// CheckCannibalism's very first gate; anything else returns immediately, no roll at all</span>
+
+P(Infection) = [Cannibalism] &times; (1.0 &minus; (1.0 &minus; [FoodPrion]) &times; (g<sub>imm</sub> &divide; 100.0))
 
 [FoodPrion]=1 &rArr; P(Infection) &equiv; 1.00     <span class="comment">// bypasses Immunity entirely</span>
-[FoodPrion]=0 &rArr; P(Infection) = 1 &minus; g<sub>imm</sub>&divide;100.0  <span class="comment">// clean raw meat</span>
+[FoodPrion]=0 &rArr; P(Infection) = 1 &minus; g<sub>imm</sub>&divide;100.0  <span class="comment">// clean raw meat, same species</span>
 
 <span class="comment">// on infection, permanent multiplicative penalty:</span>
 g<sub>k</sub> &larr; g<sub>k</sub> &times; 0.80    &forall;k &isin; {growth, imm, long}
 
 [CarcassPrion] = [RatInfected]   <span class="comment">// flag propagates into every butchered cut</span></div>
-        <p class="math-note">The penalty compounds with future <code>&#119872;(V,B)</code> mutation rolls off a permanently-lowered baseline &mdash; there's no way to breed it back out except starting from an uninfected line.</p>
+        <p class="math-note">All of the above &mdash; including the species-match gate, both branches of the infection roll, the simultaneous -20% applied identically to Growth/Immunity/Longevity (the exact same &minus;0.20 constant used in the Section 04 sickness formula, confirmed bit-identical in memory), and the carcass-flag propagation into every cut spawned by <code>OnButcher</code> &mdash; is now decompile-confirmed line-for-line, not inferred. The penalty compounds with future <code>&#119872;(V,B)</code> mutation rolls off a permanently-lowered baseline &mdash; there's no way to breed it back out except starting from an uninfected line.</p>
       </div>
     </div>
   </section>
@@ -2106,7 +2110,7 @@ g<sub>k</sub> &larr; g<sub>k</sub> &times; 0.80    &forall;k &isin; {growth, imm
           </div>
           <div class="kv-item">
             <span class="kv-key">Longevity</span>
-            <span class="kv-val">Delays the death-roll clock AND the Elder growth/fertility penalties together</span>
+            <span class="kv-val">Delays the death-roll clock &mdash; effect on Day 11 Elder weight loss not fully confirmed</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Hunger Rate</span>
@@ -2118,7 +2122,7 @@ g<sub>k</sub> &larr; g<sub>k</sub> &times; 0.80    &forall;k &isin; {growth, imm
           </div>
         </div>
         <div class="callout takeaway">
-          <strong>Bottom line:</strong> Litter Size and Growth Rate are the two that keep paying off no matter how far you push them &mdash; there's no cap in the formula. Immunity and Fertility are both "hit the number and stop" investments (50 and 100 respectively); anything spent past that is wasted breeding effort. Longevity is worth more than we first thought: it doesn't just push back the death roll, it also delays when Elder-stage weight loss and the Elder fertility penalty kick in, so a well-bred Longevity stat keeps a breeder both alive <em>and</em> productive for longer. Hunger Rate never shows up in a payout formula itself &mdash; it just keeps your rats above the 398/200-calorie thresholds longer per feeding, which is what actually protects your Growth and Fertility numbers. Max Health is the weakest pick of all seven: it never touches weight, fertility, or growth &mdash; the only thing it buys is more nights of buffer against the flat 25%-of-Max-Health disease tick and the sub-25-Immunity bleed.
+          <strong>Bottom line:</strong> Litter Size and Growth Rate are the two that keep paying off no matter how far you push them &mdash; there's no cap in the formula. Immunity and Fertility are both "hit the number and stop" investments (50 and 100 respectively); anything spent past that is wasted breeding effort. Longevity is a niche pick that only pays off if you deliberately keep breeders alive past Day 10&ndash;14 for extra litters. Hunger Rate never shows up in a payout formula itself &mdash; it just keeps your rats above the 400/200-calorie thresholds longer per feeding, which is what actually protects your Growth and Fertility numbers. Max Health is the weakest pick of all seven: it never touches weight, fertility, or growth &mdash; the only thing it buys is more nights of buffer against the flat 25%-of-Max-Health disease tick and the sub-25-Immunity bleed.
         </div>
         <div class="math-panel" hidden>
           <div class="math-label">Growth Rate &amp; Litter Size &mdash; No Ceiling In The Formula</div>
@@ -2137,14 +2141,13 @@ dP(Sick)/dg<sub>imm</sub> = &minus;0.004   for g<sub>imm</sub> &lt; 50,   then a
           <div class="math-block">P(Conception | A, B) = min(F<sub>eff</sub>(A), F<sub>eff</sub>(B)) &divide; 100.0
 <span class="comment">// F_eff is linear in the base stat up to 100, then min(F,100) implicitly caps it; the MIN-of-two rule</span>
 <span class="comment">// means a 100-Fertility rat paired with a 40-Fertility partner still only rolls at 40%</span></div>
-          <div class="math-label">Longevity &mdash; Everything It Actually Delays</div>
-          <div class="math-block">CriticalDeathAge = 14 &times; g<sub>long</sub>          <span class="comment">// delays the 75%/night death roll</span>
-ElderThreshold = 11 &times; g<sub>long</sub>            <span class="comment">// ALSO delays Elder entry - confirmed in GetAnimalCurrentWeightChange &amp; UpdateFertility</span>
-
-&Delta;W<sub>entry</sub>(ElderThreshold) = &minus;17.0   <span class="comment">// fires at the scaled threshold, not a fixed age 11</span>
-FertilityPenalty|<sub>a &ge; ElderThreshold</sub> = &minus;0.15 &times; g<sub>fert</sub>   <span class="comment">// same scaled threshold</span>
-<span class="comment">// only IsMature (mating eligibility at age 3) is a true fixed, unscaled gate</span></div>
-          <p class="math-note">Hunger Rate has no entry here because it never appears on the right-hand side of a payout formula &mdash; it only appears in <code>H<sub>drain</sub> = max(0, H &minus; g<sub>hunger</sub>)</code>, which determines how long you stay above the 398/200 thresholds that gate Growth and Fertility. Its value is entirely borrowed from whichever of those two stats it's currently protecting. Max Health has no entry either: it never appears in the Growth, Fertility, or Litter formulas at all &mdash; its only appearance anywhere is as the multiplier base in the Regen/SicknessDamage terms above (Step 05). Reducing infection odds is Immunity's job, not Health's.</p>
+          <div class="math-label">Longevity &mdash; What It Does and Doesn't Delay</div>
+          <div class="math-block">CriticalDeathAge = 14 &times; g<sub>long</sub>   <span class="comment">// delays the 75%/night death roll - the 14 is itself confirmed to live as growthStages[5], a per-species array entry</span>
+<span class="comment">// Elder-stage DISPLAY (age >= 11) still fires on schedule regardless of g_long - confirmed</span>
+<span class="comment">// in-game across multiple seeds, after an earlier misreading of the decompile said otherwise:</span>
+&Delta;W<sub>entry</sub>(11) = &minus;17.0    <span class="comment">// stage label independent of Longevity; whether the underlying nightly WEIGHT change is too is still open, see Section 08's note</span>
+FertilityPenalty|<sub>Elder</sub> = &minus;0.15 &times; g<sub>fert</sub>   <span class="comment">// independent of Longevity</span></div>
+          <p class="math-note">Hunger Rate has no entry here because it never appears on the right-hand side of a payout formula &mdash; it only appears in <code>H<sub>drain</sub> = max(0, H &minus; g<sub>hunger</sub>)</code>, which determines how long you stay above the 400/200 thresholds that gate Growth and Fertility. Its value is entirely borrowed from whichever of those two stats it's currently protecting. Max Health has no entry either: it never appears in the Growth, Fertility, or Litter formulas at all &mdash; its only appearance anywhere is as the multiplier base in the Regen/SicknessDamage terms above (Step 05). Reducing infection odds is Immunity's job, not Health's.</p>
         </div>
       </div>
     </div>
@@ -2185,6 +2188,3 @@ FertilityPenalty|<sub>a &ge; ElderThreshold</sub> = &minus;0.15 &times; g<sub>fe
   })();
 </script>
 
-
-</body>
-</html>
