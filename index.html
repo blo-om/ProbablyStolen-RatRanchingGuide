@@ -2064,7 +2064,7 @@ On Infection: Permanent -20% penalty applied simultaneously to Growth, Immunity,
           <strong>It's cannibalism specifically:</strong> <code>CheckCannibalism</code> only ever fires when the meat's species-of-origin matches the eater's own species &mdash; feed a rat any other species' meat and this entire mechanic never triggers, Prion flag or not. Only rat-on-rat feeding is at risk. Within that: meat already carrying the Prion flag infects 100% of the time, ignoring Immunity completely; clean rat meat instead rolls <code>1 - Immunity/100</code>.
         </div>
         <div class="callout takeaway">
-          <strong>Vicious Cycle:</strong> Butchering an infected rat permanently tags all resulting meat cuts. Feeding that meat back to your pen will ruin your entire colony's gene pool.
+          <strong>Vicious Cycle:</strong> Butchering an infected rat permanently tags all resulting meat cuts. Feeding that meat back to your pen infects every rat that eats it &mdash; each one takes the permanent &minus;20% on Growth, Immunity and Longevity, though the damage stays with the rat and isn't passed to its pups.
         </div>
       </div>
       <div class="math-panel" hidden>
@@ -2077,10 +2077,10 @@ P(Infection) = [Cannibalism] &times; (1.0 &minus; (1.0 &minus; [FoodPrion]) &tim
 [FoodPrion]=0 &rArr; P(Infection) = 1 &minus; g<sub>imm</sub>&divide;100.0  <span class="comment">// clean raw meat, same species</span>
 
 <span class="comment">// on infection, permanent multiplicative penalty:</span>
-g<sub>k</sub> &larr; g<sub>k</sub> &times; 0.80    &forall;k &isin; {growth, imm, long}
+bonus%<sub>k</sub> &larr; bonus%<sub>k</sub> &minus; 0.20    &forall;k &isin; {growth, imm, long}   <span class="comment">// effective stat = (1 + bonus%) &times; allele mean; alleles untouched</span>
 
 [CarcassPrion] = [RatInfected]   <span class="comment">// flag propagates into every butchered cut</span></div>
-        <p class="math-note">The -20% penalty uses the exact same coefficient as Section 04's spontaneous-sickness formula, applied here to Growth, Immunity, and Longevity simultaneously rather than gating a sickness roll. The carcass-flag propagation into every cut is handled directly in <code>OnButcher</code>. The penalty compounds with future <code>&#119872;(V,B)</code> mutation rolls off a permanently-lowered baseline &mdash; there's no way to breed it back out except starting from an uninfected line.</p>
+        <p class="math-note">The -20% penalty uses the exact same coefficient as Section 04's spontaneous-sickness formula, applied here to Growth, Immunity, and Longevity simultaneously rather than gating a sickness roll. The carcass-flag propagation into every cut is handled directly in <code>OnButcher</code>. The penalty is stored as a modifier on the infected rat (<code>ModBonusPercent</code> adds &minus;0.2 to each stat's <code>_BONUS_PERCENT</code> tag, and the game reads every stat as <code>(1 + bonus%) &times; allele mean</code>), so its alleles are never touched. It is permanent for that rat, but its pups inherit the original, clean alleles &mdash; the damage does not pass down the bloodline.</p>
       </div>
     </div>
   </section>
