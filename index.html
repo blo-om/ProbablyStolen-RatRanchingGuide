@@ -938,7 +938,7 @@
             <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
             <td><strong style="color: var(--accent-emerald);">~2.2 &ndash; 2.5</strong></td>
             <td><span class="tag-conf">0.53 / 1.86</span></td>
-            <td>Pushes back old-age death rolls. The Elder stage label always starts on Day 11 regardless; whether the nightly weight loss that comes with it is also delayed is still an open question (Step 08).</td>
+            <td>Pushes back old-age death rolls. Elder weight loss always starts on Day 11 regardless; past Day 14, Longevity only decides how long the shrinking continues before weight freezes (Step 08).</td>
           </tr>
           <tr>
             <td><strong>Immunity</strong></td>
@@ -1596,50 +1596,64 @@ P(Conception | A, B) = min(F<sub>eff</sub>(A), F<sub>eff</sub>(B)) &divide; 100.
             </button>
           </div>
         </div>
-        <div class="formula">WeightGain = StageRate &times; GrowthRate &times; (1 - HungerPenalty)
-Hunger &lt; 400: Penalty = max(0, 0.5 - 0.5 &times; H &divide; 400)
-Starving (Hunger = 0): WeightGain = -0.5 &times; |StageRate &times; GrowthRate|</div>
+        <div class="formula">StageRate  = (NextCheckpointWeight - ThisCheckpointWeight) &divide; (NextCheckpointDay - ThisCheckpointDay)
+WeightGain = round(StageRate &times; GrowthRate &times; (1 - HungerPenalty))
+Hunger &lt; 400: Penalty = 0.5 &times; (1 - H &divide; 400)
+Starving (Hunger = 0): WeightGain = -0.5 &times; |StageRate &times; GrowthRate|
+NewWeight  = max(0.25 &times; ThisCheckpointWeight, Weight + WeightGain)</div>
         <div class="table-box">
           <table>
             <thead>
               <tr>
                 <th>Stage</th>
-                <th>Age (Days)</th>
-                <th>Daily Weight Gain</th>
-                <th>Stage Bonus / Penalty</th>
+                <th>Night the rat turns&hellip;</th>
+                <th>Daily Weight Gain (&times; Growth Rate)</th>
+                <th>Weight Checkpoints</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Infant</td><td>0</td><td>+75g / night</td><td>+5g instant bonus on birth</td></tr>
-              <tr><td>Juvenile</td><td>1 &ndash; 2</td><td>+75g / night</td><td>None</td></tr>
-              <tr><td>Adolescent</td><td>3 &ndash; 4</td><td>+75g / night</td><td>None</td></tr>
-              <tr><td>Adult</td><td>5 &ndash; 10</td><td>+17g / night</td><td>None</td></tr>
-              <tr><td>Elder</td><td>11+</td><td>-17g / night</td><td>-17g instant penalty on entry</td></tr>
+              <tr><td>Infant</td><td>born at age 0</td><td>No growth night; starts at 5g</td><td>5g @ Day 0</td></tr>
+              <tr><td>Juvenile</td><td>1 &ndash; 2</td><td>+75g / night</td><td>50g @ Day 1 &rarr; 200g @ Day 3</td></tr>
+              <tr><td>Adolescent</td><td>3 &ndash; 4</td><td>+75g / night</td><td>200g @ Day 3 &rarr; 350g @ Day 5</td></tr>
+              <tr><td>Adult</td><td>5 &ndash; 10</td><td>+16.7g / night (shows as +17)</td><td>350g @ Day 5 &rarr; 450g @ Day 11</td></tr>
+              <tr><td>Elder</td><td>11 &ndash; 13</td><td>&minus;16.7g / night (shows as &minus;17)</td><td>450g @ Day 11 &rarr; 400g @ Day 14</td></tr>
+              <tr><td>Past Day 14</td><td>14+</td><td>0 (weight frozen) &mdash; unless Longevity &gt; 1, see below</td><td>400g @ Day 14</td></tr>
             </tbody>
           </table>
         </div>
         <div class="callout alert">
-          <strong>Elder Shrinkage:</strong> Elders lose 17g every night, and that loss scales with Growth Rate. Fast-growing rats shrink fastest in old age. Harvest on Day 10 before shrinkage starts!
+          <strong>Elder Shrinkage:</strong> Elders lose about 17g every night, and that loss scales with Growth Rate. Fast-growing rats shrink fastest in old age. Harvest on Day 10 before shrinkage starts &mdash; there is no separate "entry penalty," the first shrinking night is simply the night the rat turns 11.
+        </div>
+        <div class="callout takeaway">
+          <strong>Longevity does not delay shrinkage:</strong> which stage rate applies is decided by age alone up through Day 13, so Elder shrinkage begins on Day 11 for every rat. Longevity only matters from Day 14 on: at Longevity &le; 1 the weight simply freezes there, while at Longevity &gt; 1 the rat keeps shrinking at the Elder rate until it reaches Day 14 &times; Longevity (the same point where the 75% nightly death roll starts), then freezes.
         </div>
         <div class="callout alert">
-          <strong>Open question &mdash; does Longevity delay the shrinkage, not just the death roll?</strong> The Elder <em>label</em> is age-only: it always shows on Day 11, no matter how high Longevity is bred. But the separate function that computes the nightly weight change reads Longevity and swaps in a different stage's rate when a high-Longevity rat hasn't yet reached an extended, Longevity-scaled boundary &mdash; meaning a rat could visibly look "Elder" while its weight is still being computed using an earlier stage's rate. The exact resulting number isn't pinned down, so treat this as untested: if you're breeding for Longevity specifically to keep late-game breeders productive, it's worth tracking one high-Longevity rat's actual weight past Day 11 rather than assuming shrinkage starts on schedule.
+          <strong>Weight floor:</strong> a rat can never drop below 25% of its current stage's checkpoint weight (about 12g as a juvenile, 50g as an adolescent, 88g as an adult, 112g as an elder, 100g past Day 14), so starvation and shrinkage can't take it to nothing.
         </div>
         <div class="math-panel" hidden>
-          <div class="math-label">Stage-Dependent Growth &amp; Entry Bonuses</div>
-          <div class="math-block">W &isin; &#8477;&#8314;  (body mass, g)   a &isin; &#8469;&#8320;  (age, days)
+          <div class="math-label">Checkpoint Table &amp; Slope</div>
+          <div class="math-block">W &isin; &#8477;&#8314;  (body mass, g)   a &isin; &#8469;  (age AFTER tonight's +1, days)
 
-R(a) = +75.0 g/night,  0 &le; a &le; 4   <span class="comment">// Infant/Juvenile/Adolescent</span>
-     = +17.0 g/night,  5 &le; a &le; 10  <span class="comment">// Adult</span>
-     = &minus;17.0 g/night, a &ge; 11     <span class="comment">// Elder LABEL - fixed at Day 11, age-only. The nightly WEIGHT function reads Longevity here too; see the callout above</span>
+D = [0, 1, 3, 5, 11, 14]       <span class="comment">// growthStages, per-species int array (last entry is also the CriticalDeathAge base)</span>
+K = [5, 50, 200, 350, 450, 400] <span class="comment">// second per-species int array: target weight (g) at each checkpoint</span>
+i(a) = largest index with D[i] &le; a
 
-&Delta;W<sub>entry</sub>(a) = +5.0&times;[a=0] &minus; 17.0&times;[a=11]   <span class="comment">// one-time, on stage transition</span>
+R(a) = (K[i+1] &minus; K[i]) &divide; (D[i+1] &minus; D[i])
+     = 75.0    for i = 1, 2   <span class="comment">// a = 1..4</span>
+     = 16.67   for i = 3      <span class="comment">// a = 5..10</span>
+     = &minus;16.67  for i = 4      <span class="comment">// a = 11..13</span>
+<span class="comment">// i = 0 (45 g/night) is never used: age is incremented before growth runs, so a &ge; 1 by then</span>
+
+<span class="comment">// a &ge; 14 (i = 5, the last index):</span>
+R = 0                       if g<sub>long</sub> &le; 1  or  a &ge; 14&times;g<sub>long</sub>
+R = &minus;16.67 (i = 4 again)   if g<sub>long</sub> &gt; 1  and  a &lt; 14&times;g<sub>long</sub>
 
 &Pi;<sub>growth</sub>(H) = 0.5 &times; (1 &minus; H&divide;400)   for 0 &le; H &lt; 400, else 0
 
-&Delta;W = R(a) &times; g<sub>growth</sub> &times; (1 &minus; &Pi;<sub>growth</sub>(H&prime;))    if H&prime; &gt; 0
-     = &minus;0.5 &times; |R(a) &times; g<sub>growth</sub>|                     if H&prime; = 0 (starvation)
-W&prime; = max(0.01, W + &Delta;W + &Delta;W<sub>entry</sub>(a))
-<span class="comment">// a rat that dies to starvation this same night gets neither branch - no weight change at all</span></div>
+&Delta;W = round(R &times; g<sub>growth</sub> &times; (1 &minus; &Pi;<sub>growth</sub>(H)))   if not starving
+     = round(&minus;0.5 &times; |R &times; g<sub>growth</sub>|)                  if starving
+W&prime; = max(round(0.25 &times; K[i]), W + &Delta;W)      <span class="comment">// weight floor at 25% of this stage's checkpoint</span>
+<span class="comment">// birth weight = K[0] = 5g, written once at spawn; there is no separate birth bonus or Elder entry penalty</span></div>
           <div class="math-label">Feces Tier &amp; Butchery Partition</div>
           <div class="math-block">TriggerPoop = [&Delta;W &gt; 29.0]
 Tier<sub>feces</sub> = 2&times;[W&prime;&ge;1000] + 1&times;[600&le;W&prime;&lt;1000] + 0&times;[W&prime;&lt;600]
@@ -1649,7 +1663,7 @@ C<sub>Standard</sub>    = &lfloor; W<sub>eff</sub> &divide; 400 &rfloor;
 C<sub>SmallCut</sub>    = &lfloor; (W<sub>eff</sub> mod 400) &divide; 200 &rfloor;
 C<sub>Morsel</sub>      = &lfloor; (W<sub>eff</sub> mod 200) &divide; 100 &rfloor;
 C<sub>SmallMorsel</sub> = &lceil; (W<sub>eff</sub> mod 100) &divide; 50 &rceil;</div>
-          <p class="math-note">The 400-calorie threshold, the 0.5 hunger-penalty coefficient, and the 0.5 starvation multiplier are all decompile-exact, recovered from raw disassembly once the decompiler's C output dropped the floating-point arguments involved. The Longevity/Elder-rate interaction flagged above comes from that same disassembly: <code>GetAnimalCurrentWeightChange</code> reads Longevity and substitutes a different stage index only when a rat sits at the oldest stage, using a second per-species array whose values aren't pinned down &mdash; its arithmetic doesn't reproduce the plain +75/+75/+75/+17/&minus;17 g/night figures confirmed elsewhere, so the exact resulting number stays unknown. Everything in the Butchery block, by contrast, is decompiled and exact, including the sick-weight 0.75&times; multiplier and the ceiling-division trick for SmallMorsels.</p>
+          <p class="math-note">Both arrays are read straight out of the game's metadata: <code>D</code> and <code>K</code> are the two int arrays <code>AnimalSpecies.cctor</code> loads into the species (fields +0x28 and +0x30), and <code>GetAnimalCurrentWeightChange</code> divides the weight gap between checkpoints by the day gap to get the nightly rate. The 400-calorie threshold, the 0.5 hunger coefficient and the 0.5 starvation multiplier come from the same function's raw disassembly, and the floor comes from <code>GrowAnimal</code>. Everything in the Butchery block is decompiled and exact as well, including the sick-weight 0.75&times; multiplier and the ceiling-division trick for SmallMorsels.</p>
         </div>
       </div>
 
@@ -2112,7 +2126,7 @@ g<sub>k</sub> &larr; g<sub>k</sub> &times; 0.80    &forall;k &isin; {growth, imm
           </div>
           <div class="kv-item">
             <span class="kv-key">Longevity</span>
-            <span class="kv-val">Delays the death-roll clock; effect on Elder weight loss still open</span>
+            <span class="kv-val">Delays the death-roll clock; does nothing for Day 11 Elder shrinkage</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Hunger Rate</span>
@@ -2145,8 +2159,8 @@ dP(Sick)/dg<sub>imm</sub> = &minus;0.004   for g<sub>imm</sub> &lt; 50,   then a
 <span class="comment">// means a 100-Fertility rat paired with a 40-Fertility partner still only rolls at 40%</span></div>
           <div class="math-label">Longevity &mdash; What It Does and Doesn't Delay</div>
           <div class="math-block">CriticalDeathAge = 14 &times; g<sub>long</sub>   <span class="comment">// delays the 75%/night death roll; the 14 lives as growthStages[5], a per-species array entry</span>
-Elder-stage DISPLAY (age &ge; 11)   <span class="comment">// age-only, confirmed in-game across multiple seeds - independent of g_long</span>
-&Delta;W<sub>entry</sub>(11) = &minus;17.0    <span class="comment">// stage label independent of Longevity; whether the nightly WEIGHT change is too is still open (Section 08)</span>
+R(11 &le; a &le; 13) = &minus;16.67 g/night   <span class="comment">// stage picked by age only - independent of g_long</span>
+R(a &ge; 14) = &minus;16.67 while a &lt; 14&times;g<sub>long</sub> (g<sub>long</sub> &gt; 1), else 0   <span class="comment">// the only place Longevity touches weight</span>
 FertilityPenalty|<sub>Elder</sub> = &minus;0.15 &times; g<sub>fert</sub>   <span class="comment">// independent of Longevity</span></div>
           <p class="math-note">Hunger Rate has no entry here because it never appears on the right-hand side of a payout formula &mdash; it only appears in <code>H<sub>drain</sub> = max(0, H &minus; g<sub>hunger</sub>)</code>, which determines how long you stay above the 400/200 thresholds that gate Growth and Fertility. Its value is entirely borrowed from whichever of those two stats it's currently protecting. Max Health has no entry either: it never appears in the Growth, Fertility, or Litter formulas at all &mdash; its only appearance anywhere is as the multiplier base in the Regen/SicknessDamage terms above (Step 05). Reducing infection odds is Immunity's job, not Health's.</p>
         </div>
