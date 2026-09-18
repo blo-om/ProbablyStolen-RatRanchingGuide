@@ -1901,6 +1901,9 @@ NewValue   = max(0.01, Value &times; [1 + MutRoll &times; (Random(&plusmn;Mag) +
             <span class="kv-val">0.01 &times; Baseline (at high drift)</span>
           </div>
         </div>
+        <div class="callout takeaway">
+          <strong>In Plain English:</strong> Every allele gets two coin flips: a 15% chance to mutate at all, then (only if that hits) a 5% chance to triple the jump size &mdash; so a true jackpot only happens on 0.75% of all rolls, not 5%. The jump itself starts at 8% of the current value, but it shrinks the further that value already sits from the species baseline: an allele parked right at baseline can swing close to the full 8%, one already twice baseline might only manage 2&ndash;3%. Every mutation also carries a small automatic nudge back toward baseline &mdash; about a quarter the size of the jump &mdash; that always points home, never away. Worked example on Growth Rate (baseline 1.0): an allele sitting at 1.0 can land anywhere from 0.92 to 1.08 on a hit; one already parked at 2.0 can only move between about 1.94 and 2.04, because both the smaller jump and the constant homeward nudge are working against it.
+        </div>
         <div class="callout alert">
           <strong>Built-in Forward Bias:</strong> The forward jump (+1.0&times;Mag) beats the maximum backward pull (-0.25&times;Mag). About 37.5% of successful mutations produce net positive drift.
         </div>
