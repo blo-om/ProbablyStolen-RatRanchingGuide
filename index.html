@@ -1524,7 +1524,7 @@ EffectiveFertility = max(0, StatFertility &times; (1 - HungerPenalty
             <span class="kv-val">-20% per Tier</span>
           </div>
           <div class="kv-item">
-            <span class="kv-key">Elder Stage (Day 11+)</span>
+            <span class="kv-key">Elder (age &ge; 11 &times; Longevity), flat, not per day</span>
             <span class="kv-val">-15% Fertility</span>
           </div>
           <div class="kv-item">
@@ -1551,10 +1551,11 @@ CanMate = &not;IsDead &and; &not;IsStarving &and; &not;IsPregnant &and; &not;IsN
 <span class="comment">// hunger penalty only applies below 200, exact and linear:</span>
 &Pi;<sub>hunger</sub>(H) = max(0, (200 &minus; H) &divide; 200) &times; 0.40
 
-F<sub>eff</sub> = max(0, g<sub>fert</sub> &times; [1 &minus; &Pi;<sub>hunger</sub> &minus; 0.15&times;[Elder] &minus; 0.75&times;&sigma; &minus; 0.20&times;Tier])
+F<sub>eff</sub> = max(0, g<sub>fert</sub> &minus; g&#772;<sub>fert</sub> &times; [&Pi;<sub>hunger</sub> + 0.15&times;[Elder] + 0.75&times;&sigma; + 0.20&times;Tier])
+[Elder] = [ age &ge; 11 &times; g<sub>long</sub> ]     <span class="comment">// flat 15% of the base, not per day; g&#772; = the raw allele mean (no bonus modifiers)</span>
 
 P(Conception | A, B) = min(F<sub>eff</sub>(A), F<sub>eff</sub>(B)) &divide; 100.0</div>
-          <p class="math-note">Four independent linear deductions stack multiplicatively against the same base before conception probability is even rolled (see the Weak Link Rule for what happens next). The "up to 3 attempts" cap is itself read from a per-species tag (<code>ANIMAL_MAX_MATING_COUNT_TAG</code>, default 3) rather than a hardcoded literal &mdash; it isn't one of the seven mutable/inheritable genes, so it doesn't drift through breeding, but it's stored the same way the other species baselines are.</p>
+          <p class="math-note">Four independent deductions, each a fixed share of the rat's base fertility, are added together and subtracted before conception probability is even rolled. Because the result is never capped at 100, a rat with a base well above 100 can absorb the 15% Elder cut and still roll 100% (see the Weak Link Rule for what happens next). The "up to 3 attempts" cap is itself read from a per-species tag (<code>ANIMAL_MAX_MATING_COUNT_TAG</code>, default 3) rather than a hardcoded literal &mdash; it isn't one of the seven mutable/inheritable genes, so it doesn't drift through breeding, but it's stored the same way the other species baselines are.</p>
         </div>
       </div>
 
@@ -2161,7 +2162,7 @@ dP(Sick)/dg<sub>imm</sub> = &minus;0.004   for g<sub>imm</sub> &lt; 50,   then a
           <div class="math-block">CriticalDeathAge = 14 &times; g<sub>long</sub>   <span class="comment">// delays the 75%/night death roll; the 14 lives as growthStages[5], a per-species array entry</span>
 R(11 &le; a &le; 13) = &minus;16.67 g/night   <span class="comment">// stage picked by age only - independent of g_long</span>
 R(a &ge; 14) = &minus;16.67 while a &lt; 14&times;g<sub>long</sub> (g<sub>long</sub> &gt; 1), else 0   <span class="comment">// the only place Longevity touches weight</span>
-FertilityPenalty|<sub>Elder</sub> = &minus;0.15 &times; g<sub>fert</sub>   <span class="comment">// independent of Longevity</span></div>
+FertilityPenalty|<sub>Elder</sub> = &minus;0.15 &times; g<sub>fert</sub>   <span class="comment">// once age &ge; 11 &times; g_long; flat, not per day, so Longevity DOES delay it</span></div>
           <p class="math-note">Hunger Rate has no entry here because it never appears on the right-hand side of a payout formula &mdash; it only appears in <code>H<sub>drain</sub> = max(0, H &minus; g<sub>hunger</sub>)</code>, which determines how long you stay above the 400/200 thresholds that gate Growth and Fertility. Its value is entirely borrowed from whichever of those two stats it's currently protecting. Max Health has no entry either: it never appears in the Growth, Fertility, or Litter formulas at all &mdash; its only appearance anywhere is as the multiplier base in the Regen/SicknessDamage terms above (Step 05). Reducing infection odds is Immunity's job, not Health's.</p>
         </div>
       </div>
