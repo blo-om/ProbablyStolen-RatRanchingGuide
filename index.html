@@ -1505,19 +1505,19 @@ P(Recovery) = g<sub>imm</sub> &divide; 100.0
           </div>
         </div>
         <div class="formula">Occupancy = RatTiles &divide; TotalTiles
-Tier = [Occupancy &ge; 0.55] + [Occupancy &ge; 0.70] + [Occupancy &ge; 0.90]
+Tier = [Occupancy &gt; 0.55] + [Occupancy &gt; 0.70] + [Occupancy &gt; 0.90]   (strict, no rounding)
 
-Tier 0 (&lt;0.55): Completely safe
-Tier 1 (0.55&ndash;0.69): No deaths (only boosts dirty-cage sickness odds)
-Tier 2 (0.70&ndash;0.89): 5% death roll per rat each night
-Tier 3 (&ge;0.90):      15% death roll per rat each night</div>
+Tier 0 (&le; 0.55): Completely safe
+Tier 1 (&gt; 0.55 up to 0.70): No deaths (boosts dirty-cage sickness odds and cuts fertility)
+Tier 2 (&gt; 0.70 up to 0.90): 5% death roll per rat each night
+Tier 3 (&gt; 0.90):      15% death roll per rat each night</div>
         <div class="callout alert">
           <strong>Instant Kill:</strong> Overcrowding is not a damage tick—it's an instant kill. The game always picks the lightest living rat that weighs less than the rat rolling the check. Runts and newborns die first.
         </div>
         <div class="math-panel" hidden>
           <div class="math-label">Occupancy, Tier &amp; Victim Selection</div>
           <div class="math-block">&rho; = RatTiles &divide; TotalTiles  &isin; [0, 1]
-Tier(&rho;) = [&rho; &ge; 0.55] + [&rho; &ge; 0.70] + [&rho; &ge; 0.90]  &isin; {0,1,2,3}
+Tier(&rho;) = [&rho; &gt; 0.55] + [&rho; &gt; 0.70] + [&rho; &gt; 0.90]  &isin; {0,1,2,3}   <span class="comment">// plain float compare, no rounding: 16/30 = 53.3% is Tier 0, 17/30 is Tier 1</span>
 
 P(Cull | Tier) = 0.00,  Tier &isin; {0, 1}
               = 0.05,  Tier = 2
