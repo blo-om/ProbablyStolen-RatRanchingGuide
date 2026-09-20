@@ -748,6 +748,64 @@
       gap: 1rem;
       font-family: var(--font-mono);
     }
+    /* Slight rainbow warp */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(60% 45% at 15% 20%, rgba(248, 113, 113, 0.10), transparent 70%),
+        radial-gradient(55% 45% at 85% 25%, rgba(251, 191, 36, 0.08), transparent 70%),
+        radial-gradient(60% 50% at 70% 80%, rgba(52, 211, 153, 0.09), transparent 70%),
+        radial-gradient(55% 45% at 20% 85%, rgba(56, 189, 248, 0.10), transparent 70%),
+        radial-gradient(50% 40% at 50% 50%, rgba(192, 132, 252, 0.07), transparent 70%);
+      transform: skewY(-4deg);
+      animation: rainbow-drift 40s linear infinite;
+    }
+
+    @keyframes rainbow-drift {
+      from { filter: hue-rotate(0deg); }
+      to   { filter: hue-rotate(360deg); }
+    }
+
+    header {
+      border-top: 0;
+      position: relative;
+    }
+
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      background: linear-gradient(90deg, #f87171, #fbbf24, #34d399, #38bdf8, #818cf8, #c084fc, #f87171);
+      background-size: 200% 100%;
+      animation: rainbow-slide 14s linear infinite;
+    }
+
+    h1 {
+      background: linear-gradient(100deg, #ffffff 0%, #ffe4e6 18%, #fef3c7 34%, #d1fae5 50%, #e0f2fe 66%, #ede9fe 82%, #ffffff 100%);
+      background-size: 220% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      animation: rainbow-slide 18s linear infinite;
+    }
+
+    @keyframes rainbow-slide {
+      from { background-position: 0% 0; }
+      to   { background-position: 200% 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::before, header::before, h1 { animation: none; }
+    }
   </style>
 
 <a href="#" class="back-to-top" id="backToTop" aria-label="Back to top">
