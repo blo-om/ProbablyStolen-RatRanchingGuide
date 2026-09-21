@@ -996,7 +996,7 @@
             <td><code style="color: var(--accent-blue);">[0.01, &infin;)</code></td>
             <td><strong style="color: var(--accent-emerald);">~2.2 &ndash; 2.5</strong></td>
             <td><span class="tag-conf">0.53 / 1.86</span></td>
-            <td>Pushes back old-age death rolls. Elder weight loss always starts on Day 11 regardless; past Day 14, Longevity only decides how long the shrinking continues before weight freezes (Step 08).</td>
+            <td>Pushes back old-age death rolls. Elder weight loss always starts on Day 11 regardless; past Day 14, Longevity only decides how long the shrinking continues before the death roll takes over (Step 08).</td>
           </tr>
           <tr>
             <td><strong>Immunity</strong></td>
@@ -1676,7 +1676,7 @@ NewWeight  = max(0.25 &times; ThisCheckpointWeight, Weight + WeightGain)</div>
               <tr><td>Adolescent</td><td>3 &ndash; 4</td><td>+75g / night</td><td>200g @ Day 3 &rarr; 350g @ Day 5</td></tr>
               <tr><td>Adult</td><td>5 &ndash; 10</td><td>+16.7g / night (shows as +17)</td><td>350g @ Day 5 &rarr; 450g @ Day 11</td></tr>
               <tr><td>Elder</td><td>11 &ndash; 13</td><td>&minus;16.7g / night (shows as &minus;17)</td><td>450g @ Day 11 &rarr; 400g @ Day 14</td></tr>
-              <tr><td>Past Day 14</td><td>14+</td><td>0 (weight frozen) &mdash; unless Longevity &gt; 1, see below</td><td>400g @ Day 14</td></tr>
+              <tr><td>Day 14 &times; Longevity+</td><td>14+</td><td>No weight change; the 75% nightly death roll is running, so the rat rarely lasts long (Longevity &gt; 1 keeps shrinking until then, see below)</td><td>400g @ Day 14</td></tr>
             </tbody>
           </table>
         </div>
@@ -1684,7 +1684,7 @@ NewWeight  = max(0.25 &times; ThisCheckpointWeight, Weight + WeightGain)</div>
           <strong>Elder Shrinkage:</strong> Elders lose about 17g every night, and that loss scales with Growth Rate. Fast-growing rats shrink fastest in old age. Harvest on Day 10 before shrinkage starts &mdash; there is no separate "entry penalty," the first shrinking night is simply the night the rat turns 11.
         </div>
         <div class="callout takeaway">
-          <strong>Longevity does not delay shrinkage:</strong> which stage rate applies is decided by age alone up through Day 13, so Elder shrinkage begins on Day 11 for every rat. Longevity only matters from Day 14 on: at Longevity &le; 1 the weight simply freezes there, while at Longevity &gt; 1 the rat keeps shrinking at the Elder rate until it reaches Day 14 &times; Longevity (the same point where the 75% nightly death roll starts), then freezes.
+          <strong>Longevity does not delay shrinkage:</strong> which stage rate applies is decided by age alone up through Day 13, so Elder shrinkage begins on Day 11 for every rat. Longevity only matters from Day 14 on: the rat keeps shrinking at the Elder rate until it reaches Day 14 &times; Longevity, which is exactly when the 75% nightly death roll starts. From that point weight no longer changes, because the rat is almost certainly on its way out (at Longevity &le; 1 that point is Day 14 itself).
         </div>
         <div class="callout alert">
           <strong>Weight floor:</strong> a rat can never drop below 25% of its current stage's checkpoint weight (about 12g as a juvenile, 50g as an adolescent, 88g as an adult, 112g as an elder, 100g past Day 14), so starvation and shrinkage can't take it to nothing.
