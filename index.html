@@ -1162,20 +1162,17 @@ Loose food  : Hunger = min(MaxHunger, Hunger + ItemCalories), one item</div>
             <span class="kv-val">375 (75% of Max Hunger)</span>
           </div>
           <div class="kv-item">
-            <span class="kv-key">Dispenser Refills To</span>
+            <span class="kv-key">Dispenser Refills Up To</span>
             <span class="kv-val">425 (85% of Max Hunger)</span>
           </div>
           <div class="kv-item">
-            <span class="kv-key">Starting Newborn Stomach</span>
+            <span class="kv-key">Newborn Hunger</span>
             <span class="kv-val">125 (25% of Max Hunger)</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Starvation Trigger</span>
             <span class="kv-val">Hits 0 (Loses weight, can't mate)</span>
           </div>
-        </div>
-        <div class="callout takeaway">
-          <strong>Eat Below 375, Refill To 425:</strong> A rat only tries to eat once its hunger has dropped below 75% of its max (375 of 500); above that it skips feeding entirely, even with a full feeder next to it. From a feed dispenser it refills to 85% of max (425), not to full, taking only what the dispenser still has stored. Loose food items in the cage (canned food excluded) are eaten whole, one per night, and can lift hunger all the way to the 500 cap, with any excess wasted. That makes a rat on a 39 hunger rate cycle like this: 425 &rarr; 385 (no meal, still above 375) &rarr; 346 (below 375, refills to 425). Rates of 25 or less stretch it to three nights or more.
         </div>
         <div class="callout alert">
           <strong>Newborns start a quarter full, not full:</strong> every newborn's Hunger tag is set to <code>MaxHunger &times; 0.25</code> at birth &mdash; 125 out of the 500 reservoir, not the full tank. Litters need feeding sooner than their stomach size suggests.
@@ -1210,7 +1207,7 @@ H<sub>newborn</sub> = 500 &times; 0.25 = 125   <span class="comment">// GiveBirt
         <div class="kv-list">
           <div class="kv-item">
             <span class="kv-key">Stunted Growth (Step 08)</span>
-            <span class="kv-val">&lt; 400 Calories (-1% to -50% weight gain)</span>
+            <span class="kv-val">&lt; 400 Calories (0% at 400, scaling down to -50% near 0)</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Lowered Fertility (Step 07)</span>
