@@ -2000,7 +2000,7 @@ NewValue   = max(0.01, Value &times; [1 + MutRoll &times; (Random(&plusmn;Mag) +
   <!-- SECTION 11: Theory vs Reality -->
   <section>
     <div class="section-header">
-      <h2 class="section-title"><span class="section-num">11</span> Why Breeding Hits a Wall Around 2.5&times; to 2.6&times;</h2>
+      <h2 class="section-title"><span class="section-num">11</span> Breeding Over Time</h2>
       <span class="card-badge warn">Colony Dynamics</span>
     </div>
 
@@ -2079,7 +2079,7 @@ P(both alleles +, same birth) = (0.05625)<sup>2</sup> &asymp; 0.316%
 
       <div class="card">
         <div class="card-head">
-          <span class="card-title">In Practice: The Casual Plateau</span>
+          <span class="card-title">Non-selective Breeding Plateau</span>
           <span class="card-badge warn">Stalls Around ~2.4 &ndash; 2.6x</span>
         </div>
         <div class="kv-list">
@@ -2210,7 +2210,10 @@ bonus%<sub>k</sub> &larr; bonus%<sub>k</sub> &minus; 0.20    &forall;k &isin; {g
           </div>
         </div>
         <div class="callout takeaway">
-          <strong>Bottom line:</strong> Litter Size and Growth Rate are the two that keep paying off no matter how far you push them &mdash; there's no cap in the formula. Immunity and Fertility are both "hit the number and stop" investments (50 and 100 respectively); anything spent past that is wasted breeding effort. Longevity is a niche pick that only pays off if you deliberately keep breeders alive past Day 10&ndash;14 for extra litters. Hunger Rate never shows up in a payout formula itself &mdash; it just keeps your rats above the 400/200-calorie thresholds longer per feeding, which is what actually protects your Growth and Fertility numbers. Max Health is the weakest pick of all seven: it never touches weight, fertility, or growth &mdash; the only thing it buys is more nights of buffer against the flat 25%-of-Max-Health disease tick and the sub-25-Immunity bleed.
+          <strong>Bottom line for meat production:</strong> Growth Rate is the stat that matters. A rat butchered on Day 10 weighs roughly 5g + 400g &times; Growth Rate (before any hunger penalty), so every point of Growth Rate is about 400g more meat per rat, with no cap. Next comes keeping rats healthy and fed: Immunity up to 50 stops random sickness (a sick rat yields 25% less), though dirty or crowded cages can still make rats sick whatever their Immunity, and keeping hunger above 400 avoids the growth penalty. A lower Hunger Rate means less feed burned per rat, since each rat eats roughly its Hunger Rate in calories every night. Upstream of that, Litter Size and Fertility decide how many rats each breeder gives you. Longevity and Max Health are close to worthless here, because the rat is gone on Day 10, long before either matters.
+        </div>
+        <div class="callout takeaway">
+          <strong>Bottom line for colony improvement:</strong> Litter Size and Growth Rate are the two that keep paying off however far you push them, because there's no cap in the formula, and Litter Size compounds every generation. Immunity is worth building to 50 and has diminishing returns beyond it (faster recovery and prion defense). Fertility is worth building to 100; past that it only buys a cushion against the Elder, sickness, hunger and overcrowding cuts, since the effective value isn't capped. Hunger Rate is a running cost rather than a payout: lower means longer between meals and cheaper feeding. Longevity only pays off if you deliberately keep star breeders alive past Day 10&ndash;14: it delays both the old-age death roll and the Elder fertility cut, at the cost of more shrinking days. Max Health is the weakest pick of all seven. Because genes are fixed at birth, you can judge a rat the moment it's born, and the best results come from pairing rats from the same elite tier rather than mixing in weaker ones (see Breeding Over Time).
         </div>
         <div class="math-panel" hidden>
           <div class="math-label">Growth Rate &amp; Litter Size &mdash; No Ceiling In The Formula</div>
