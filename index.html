@@ -1149,11 +1149,21 @@ P(k=1) = 25.00%     P(k=2) = 6.25%     P(k=4) &asymp; 0.39%</div>
           </div>
         </div>
         <div class="formula">HungerToday = max(0, HungerYesterday - HungerStat)
-FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
+TriesToEat  = [HungerToday &lt; 0.75 &times; MaxHunger]          (below 375)
+Dispenser   : refills to 0.85 &times; MaxHunger (425), limited by its stock
+Loose food  : Hunger = min(MaxHunger, Hunger + ItemCalories), one item</div>
         <div class="kv-list">
           <div class="kv-item">
             <span class="kv-key">Standard Daily Drain</span>
             <span class="kv-val">65.0 Calories</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Rat Tries To Eat Below</span>
+            <span class="kv-val">375 (75% of Max Hunger)</span>
+          </div>
+          <div class="kv-item">
+            <span class="kv-key">Dispenser Refills To</span>
+            <span class="kv-val">425 (85% of Max Hunger)</span>
           </div>
           <div class="kv-item">
             <span class="kv-key">Starting Newborn Stomach</span>
@@ -1165,7 +1175,7 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
           </div>
         </div>
         <div class="callout takeaway">
-          <strong>Picky Eaters:</strong> Rats won't touch a food item if their current hunger already covers 75% of <em>that item's</em> value (<code>FoodMaxValue &times; 0.75 &le; HungerToday</code>) &mdash; relative to each food's own value, not a single fixed hunger number like "425." A small snack still gets eaten well past the point a big meal would be rejected.
+          <strong>Eat Below 375, Refill To 425:</strong> A rat only tries to eat once its hunger has dropped below 75% of its max (375 of 500); above that it skips feeding entirely, even with a full feeder next to it. From a feed dispenser it refills to 85% of max (425), not to full, taking only what the dispenser still has stored. Loose food items in the cage (canned food excluded) are eaten whole, one per night, and can lift hunger all the way to the 500 cap, with any excess wasted. That makes a rat on a 39 hunger rate cycle like this: 425 &rarr; 385 (no meal, still above 375) &rarr; 346 (below 375, refills to 425). Rates of 25 or less stretch it to three nights or more.
         </div>
         <div class="callout alert">
           <strong>Newborns start a quarter full, not full:</strong> every newborn's Hunger tag is set to <code>MaxHunger &times; 0.25</code> at birth &mdash; 125 out of the 500 reservoir, not the full tank. Litters need feeding sooner than their stomach size suggests.
@@ -1176,13 +1186,19 @@ FoodRejected = [FoodMaxValue &times; 0.75 &le; HungerToday]</div>
 
 H<sub>drain</sub> = max(0, H &minus; g<sub>hunger</sub>)
 
-<span class="comment">// for a food item F with caloric value F_kcal:</span>
-RejectFood(F) = [H<sub>drain</sub> &ge; 0.75 &times; F<sub>kcal</sub>]
+<span class="comment">// TryFeed runs right after the drain, every night:</span>
+Eats = [H<sub>drain</sub> &lt; 0.75 &times; H<sub>max</sub>]                            <span class="comment">// 375</span>
 
-H&prime; = min(500, H<sub>drain</sub> + min(F<sub>kcal</sub>, 500 &minus; H<sub>drain</sub>))
-Starvation(t) = [H&prime; = 0]
+<span class="comment">// feed dispenser (first one with stock):</span>
+H&prime; = min(0.85 &times; H<sub>max</sub>, H<sub>drain</sub> + min(&lceil;0.85 &times; H<sub>max</sub> &minus; H<sub>drain</sub>&rceil;, Stock))   <span class="comment">// exactly 425 if stocked</span>
+
+<span class="comment">// if still below 375: one loose, non-canned food item with calories F_kcal:</span>
+H&Prime; = min(H<sub>max</sub>, H&prime; + F<sub>kcal</sub>)                                <span class="comment">// can exceed 425; overflow is wasted</span>
+
+Starvation(t) = [H = 0 after feeding]
 
 H<sub>newborn</sub> = 500 &times; 0.25 = 125   <span class="comment">// GiveBirth's own hunger-init callback</span></div>
+          <p class="math-note">The 0.75 and 0.85 are fractions of the rat's own max hunger, not of any food's value, and the dispenser amount is rounded up before being capped, so a stocked dispenser always lands on exactly 425.0. Hunger shown in tooltips is rounded to the nearest whole number (half to even). If a dispenser holds calories that came from rats, feeding from it runs the same cannibalism check as loose rat meat (Step 12).</p>
         </div>
       </div>
 
@@ -1206,7 +1222,7 @@ H<sub>newborn</sub> = 500 &times; 0.25 = 125   <span class="comment">// GiveBirt
           </div>
         </div>
         <div class="callout takeaway">
-          <strong>Breeding Goal:</strong> Breeding Hunger Rate down allows rats to stay above the 400 growth threshold for days on a single feeding.
+          <strong>Breeding Goal:</strong> A lower Hunger Rate stretches the time between meals, since rats only eat once they're under 375: about every second night at a rate above 25, every third night at 25 or less. It also keeps them closer to the 400 line below which growth is penalized.
         </div>
         <div class="callout alert">
           <strong>What starving actually costs you:</strong> hitting 0 Hunger doesn't kill on the spot &mdash; it just sets a starving flag. Death only follows if that flag is <em>still</em> set the next night (a full day/night cycle at 0 with nothing eaten); Hunger rising above 0 clears the flag immediately. Short of that, a starving rat still pays every night: weight change flips negative at half the magnitude of its normal rate, guaranteed loss regardless of stage (Step 08), and a pregnant starving rat rolls a flat <strong>75% chance to lose the pregnancy</strong> instead of progressing (Step 09) &mdash; both gated by the exact same starving flag.
@@ -1377,7 +1393,7 @@ g<sub>imm</sub> &ge; 50.0 &rArr;  P(Sick) &equiv; 0.000
           </div>
         </div>
         <div class="callout alert">
-          <strong>Myth, likely busted:</strong> a popular claim holds that sick rats raise the disease odds for healthy cage-mates, and that high-Immunity rats speed up sick neighbors' recovery. Every disease-related function in <code>HusbandryHelper</code> &mdash; <code>CheckImmunityDisease</code>, <code>CheckHygiene</code>, and the nightly damage/recovery tick <code>HandleDisease</code> &mdash; reads only the affected rat's own Immunity and never looks at another rat or a cage-mate count. If cage-to-cage contagion is real, it isn't happening here; it would have to live in unrelated inventory/container code we haven't searched.
+          <strong>Myth, likely busted:</strong> a popular claim holds that sick rats raise the disease odds for healthy cage-mates, and that high-Immunity rats speed up sick neighbors' recovery. Only seven functions in the entire game touch the disease flag, and the ones that set it (<code>CheckImmunityDisease</code>, <code>CheckHygiene</code> and the nightly routine) only ever set it on the rat being processed, reading that rat's own Immunity; none looks at another rat. What looks like spreading is the cage: a dirty or crowded cage gives every rat in it the same extra sickness roll on the same night, and a rat that dies leaves a corpse that adds to the waste count until you butcher it.
         </div>
       </div>
     </div>
@@ -1717,7 +1733,7 @@ W&prime; = max(round(0.25 &times; K[i]), W + &Delta;W)      <span class="comment
           <div class="math-block">TriggerPoop = [&Delta;W &gt; 29.0]
 Tier<sub>feces</sub> = 2&times;[W&prime;&ge;1000] + 1&times;[600&le;W&prime;&lt;1000] + 0&times;[W&prime;&lt;600]
 
-W<sub>eff</sub> = W &times; (1 &minus; 0.25 &times; &sigma;)
+W<sub>eff</sub> = round(W &times; (1 &minus; 0.25 &times; &sigma;))   <span class="comment">// half-to-even; e.g. 475g sick &rarr; 356g</span>
 C<sub>Standard</sub>    = &lfloor; W<sub>eff</sub> &divide; 400 &rfloor;
 C<sub>SmallCut</sub>    = &lfloor; (W<sub>eff</sub> mod 400) &divide; 200 &rfloor;
 C<sub>Morsel</sub>      = &lfloor; (W<sub>eff</sub> mod 200) &divide; 100 &rfloor;
@@ -1732,7 +1748,7 @@ C<sub>SmallMorsel</sub> = &lceil; (W<sub>eff</sub> mod 100) &divide; 50 &rceil;<
           <span class="card-title card-title-icon"><img class="pixel-art" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAgCAYAAABU1PscAAAC2ElEQVR4nNVYzWrUUBjN/GCX7Rj7AuKi3ZUqtMFHUJ9BXLgIFCq4rVL0BRSEWXQhPoNufILpgB3cNQvxBTSM68KIfLc5zpdvvi/JvQnVHhju5M6d3HNOzv2Sm14URb3oGqMfXXMMr2qi7dv3fmv959+/tDKx13WELKLjl8/U8emrN63EdCqAyGtEP70dq+MfHqaqGB8hnQiA65z8t/E712YXA9du3Vis/C+7GKyIgJCmIloJkMThtEbWQlYIfPLhhWt/zH56RStIgEXch/xo965rJ6dfSwK4iCZXpO9LnD7PN4fRg/W10m8gDkfrMJ+duTbZ33Ht+8evS/FDBGGUVRz6vsTpw7ML98lRIuMTn7kQQZg8PS4JaX0fAHGAOwzyIABCPpjPzpx4Ei6jg5ht7t4KEyDJA8grdy6EvCTbxHGJ4Lsg3CLiIeThLsed9KB0TOetcr9SgOV+F5Dk54YByclyPVjwZohFeulM4spg3cIlwpKkPN5KH11+SQ9qXW8VIVrEKHk0EVUj6rPKJ3ebvmtikpPjv5HUyGfjj5H3jYwidP/mWrQ/WKiTEmFyHrnlExMZviARBerHOCqXSdGP0knzxHvJyvlIwNHnqXozayzATVTERRMEorIUcsJVGLErhTjBeRJl3Y1rBRC4CJwQkKWPVxIrDlL8qDi3RhwIEkCPC79YtEmIJAqSPB4hyFjOOfE6AbVVaKPgTEJOF0s1o+nEtfl0ORbfNQJ5MZ4j3kvUfh8Mq9zXhPDJQyD/FzMRIef0KqO0gLWaTwSqnGxCMA40xBRg7aCs3ywh2rHsixl530hVXgFLBH2sfa4kq5GsGucLcxHjRtVFxquilDPylpCqHZkqwA2mHZBYyASI0p4mNTFN3c0Dr4J5BSAC1YhvGWkfABetiZsQyo3S6vOapXZTL/eiEIQtpbUgZT89y/jivMGrFe+3Etbmugsy/8WrxatG/18TaIs/2raSMRpX6mwAAAAASUVORK5CYII=" alt="Raw meat">Butcher Cuts &amp; Droppings</span>
           <span class="card-badge info">Discrete Modulo</span>
         </div>
-        <div class="formula">EffectiveWeight = Weight &times; (1 - 0.25 &times; IsSick)
+        <div class="formula">EffectiveWeight = round(Weight &times; (1 - 0.25 &times; IsSick))   (half to even)
 
 StandardCuts = floor(EffectiveWeight &divide; 400)
 SmallCuts    = floor((EffectiveWeight mod 400) &divide; 200)
